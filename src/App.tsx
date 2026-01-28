@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Carpooling from "./pages/Carpooling";
@@ -13,6 +13,63 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Protected Route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
+          <span className="text-xl font-bold text-primary-foreground">C</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const AppRoutes = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
+          <span className="text-xl font-bold text-primary-foreground">C</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Root redirects to home if logged in, otherwise shows auth */}
+      <Route path="/" element={user ? <Navigate to="/home" replace /> : <Auth />} />
+      <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <Auth />} />
+      
+      {/* Protected routes */}
+      <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/carpooling" element={<ProtectedRoute><Carpooling /></ProtectedRoute>} />
+      <Route path="/errands" element={<ProtectedRoute><Errands /></ProtectedRoute>} />
+      <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      
+      {/* Redirects for old routes */}
+      <Route path="/rides" element={<Navigate to="/carpooling?tab=find" replace />} />
+      <Route path="/create-ride" element={<Navigate to="/carpooling?tab=offer" replace />} />
+      <Route path="/my-trips" element={<Navigate to="/carpooling?tab=trips" replace />} />
+      
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -20,21 +77,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/carpooling" element={<Carpooling />} />
-            <Route path="/errands" element={<Errands />} />
-            <Route path="/help" element={<Help />} />
-            
-            {/* Redirects for old routes */}
-            <Route path="/rides" element={<Navigate to="/carpooling?tab=find" replace />} />
-            <Route path="/create-ride" element={<Navigate to="/carpooling?tab=offer" replace />} />
-            <Route path="/my-trips" element={<Navigate to="/carpooling?tab=trips" replace />} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
