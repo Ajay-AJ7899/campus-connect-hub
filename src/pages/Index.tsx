@@ -3,9 +3,10 @@ import { ArrowRight, Car, Users, Shield, MapPin, Clock, Zap } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
+import FeatureCards from "@/components/home/FeatureCards";
 
 const Index = () => {
-  const features = [
+  const benefits = [
     {
       icon: Car,
       title: "Smart Carpooling",
@@ -68,13 +69,13 @@ const Index = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-              <Link to="/rides">
+              <Link to="/carpooling?tab=find">
                 <Button size="lg" className="gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-glow hover:shadow-glow-lg transition-all duration-300">
                   Find a Ride
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link to="/create-ride">
+              <Link to="/carpooling?tab=offer">
                 <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 hover:bg-secondary transition-all duration-300">
                   Offer a Ride
                 </Button>
@@ -104,7 +105,10 @@ const Index = () => {
         <div className="absolute top-20 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl translate-x-1/2" />
       </section>
 
-      {/* Features Section */}
+      {/* Feature Cards Section */}
+      <FeatureCards />
+
+      {/* Benefits Section */}
       <section className="py-20 md:py-32 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -119,18 +123,18 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
+            {benefits.map((benefit, index) => (
               <Card 
-                key={feature.title}
+                key={benefit.title}
                 className="group hover:shadow-card-hover transition-all duration-300 border-transparent hover:border-primary/20 animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-6">
                   <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="w-6 h-6 text-primary-foreground" />
+                    <benefit.icon className="w-6 h-6 text-primary-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
+                  <p className="text-muted-foreground text-sm">{benefit.description}</p>
                 </CardContent>
               </Card>
             ))}

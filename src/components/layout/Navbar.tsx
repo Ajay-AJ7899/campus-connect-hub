@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Bell, User, Car, MapPin, LogOut, Plus } from "lucide-react";
+import { Menu, X, Bell, User, Car, ShoppingBag, Shield, LogOut, Plus, ChevronDown, MapPin, Users, AlertTriangle, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,21 +11,63 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
+const navItems = [
+  {
+    label: "Carpooling",
+    href: "/carpooling",
+    icon: Car,
+    gradient: "from-primary to-primary/80",
+    items: [
+      { label: "Find Rides", href: "/carpooling?tab=find", icon: Car, description: "Browse available rides" },
+      { label: "Offer a Ride", href: "/carpooling?tab=offer", icon: Plus, description: "Share your journey" },
+      { label: "My Trips", href: "/carpooling?tab=trips", icon: MapPin, description: "Manage your rides" },
+    ],
+  },
+  {
+    label: "Errands",
+    href: "/errands",
+    icon: ShoppingBag,
+    gradient: "from-orange-500 to-amber-500",
+    items: [
+      { label: "Browse Errands", href: "/errands?tab=browse", icon: ShoppingBag, description: "Help others with tasks" },
+      { label: "Post Errand", href: "/errands?tab=post", icon: Plus, description: "Request help" },
+      { label: "Group Orders", href: "/errands?tab=orders", icon: Users, description: "Join food orders" },
+      { label: "My Requests", href: "/errands?tab=my-requests", icon: ClipboardList, description: "Track your errands" },
+    ],
+  },
+  {
+    label: "Help",
+    href: "/help",
+    icon: Shield,
+    gradient: "from-red-500 to-rose-500",
+    items: [
+      { label: "Report Emergency", href: "/help?tab=report", icon: AlertTriangle, description: "Get urgent help" },
+      { label: "Active Tickets", href: "/help?tab=active", icon: Bell, description: "Community requests" },
+      { label: "My Requests", href: "/help?tab=my-requests", icon: ClipboardList, description: "Your submitted tickets" },
+    ],
+  },
+];
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
 
-  const navLinks = [
-    { href: "/rides", label: "Find Rides", icon: Car },
-    { href: "/my-trips", label: "My Trips", icon: MapPin },
-  ];
-
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname.startsWith(path.split("?")[0]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,30 +99,55 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                  isActive(link.href)
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                <link.icon className="w-4 h-4" />
-                {link.label}
-              </Link>
-            ))}
-          </div>
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+              {navItems.map((item) => (
+                <NavigationMenuItem key={item.label}>
+                  <NavigationMenuTrigger 
+                    className={cn(
+                      "bg-transparent",
+                      isActive(item.href) && "text-primary"
+                    )}
+                  >
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[320px] gap-2 p-4 bg-background">
+                      {item.items.map((subItem) => (
+                        <li key={subItem.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={subItem.href}
+                              className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                            >
+                              <div className={cn(
+                                "w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0",
+                                item.gradient
+                              )}>
+                                <subItem.icon className="w-4 h-4 text-white" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">{subItem.label}</div>
+                                <div className="text-xs text-muted-foreground">{subItem.description}</div>
+                              </div>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2">
             {user ? (
               <>
                 {/* Create Ride Button */}
-                <Link to="/create-ride" className="hidden sm:block">
+                <Link to="/carpooling?tab=offer" className="hidden sm:block">
                   <Button className="gradient-primary text-primary-foreground">
                     <Plus className="w-4 h-4 mr-2" />
                     Offer Ride
@@ -107,7 +174,7 @@ const Navbar = () => {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 bg-background">
                     <div className="px-2 py-1.5">
                       <p className="font-medium">{profile?.full_name || "User"}</p>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -120,7 +187,7 @@ const Navbar = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/my-trips" className="cursor-pointer">
+                      <Link to="/carpooling?tab=trips" className="cursor-pointer">
                         <Car className="w-4 h-4 mr-2" />
                         My Trips
                       </Link>
@@ -158,27 +225,48 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
-                    isActive(link.href)
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
+              {navItems.map((item) => (
+                <Collapsible 
+                  key={item.label}
+                  open={openMobileSection === item.label}
+                  onOpenChange={(open) => setOpenMobileSection(open ? item.label : null)}
                 >
-                  <link.icon className="w-5 h-5" />
-                  {link.label}
-                </Link>
+                  <CollapsibleTrigger className={cn(
+                    "flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                    isActive(item.href)
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}>
+                    <div className="flex items-center gap-3">
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </div>
+                    <ChevronDown className={cn(
+                      "w-4 h-4 transition-transform duration-200",
+                      openMobileSection === item.label && "rotate-180"
+                    )} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pl-8 pr-4 py-2 space-y-1">
+                    {item.items.map((subItem) => (
+                      <Link
+                        key={subItem.href}
+                        to={subItem.href}
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      >
+                        <subItem.icon className="w-4 h-4" />
+                        {subItem.label}
+                      </Link>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
               ))}
+              
               {user && (
                 <Link
-                  to="/create-ride"
+                  to="/carpooling?tab=offer"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium gradient-primary text-primary-foreground"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium gradient-primary text-primary-foreground mt-2"
                 >
                   <Plus className="w-5 h-5" />
                   Offer Ride
