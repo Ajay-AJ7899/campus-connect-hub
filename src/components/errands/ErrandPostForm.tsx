@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { parseMoneyToCents } from "@/lib/money";
 
 const MAX_FILES = 2;
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -17,6 +18,7 @@ const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const schema = z.object({
   title: z.string().trim().min(3, "Title is too short").max(80, "Title is too long"),
   description: z.string().trim().min(10, "Description is too short").max(800, "Description is too long"),
+  price: z.string().trim().max(20).optional(),
 });
 
 type ErrandPostFormProps = {
@@ -29,6 +31,7 @@ export default function ErrandPostForm({ onSuccess }: ErrandPostFormProps) {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -75,6 +78,7 @@ export default function ErrandPostForm({ onSuccess }: ErrandPostFormProps) {
   const reset = () => {
     setTitle("");
     setDescription("");
+    setPrice("");
     setFiles([]);
   };
 
@@ -84,7 +88,7 @@ export default function ErrandPostForm({ onSuccess }: ErrandPostFormProps) {
       return;
     }
 
-    const parsed = schema.safeParse({ title, description });
+    const parsed = schema.safeParse({ title, description, price });
     if (!parsed.success) {
       toast({
         variant: "destructive",
@@ -103,6 +107,7 @@ export default function ErrandPostForm({ onSuccess }: ErrandPostFormProps) {
           campus_id: profile.campus_id ?? null,
           title: parsed.data.title,
           description: parsed.data.description,
+          price_cents: parseMoneyToCents(parsed.data.price ?? ""),
         })
         .select("*")
         .single();
@@ -160,6 +165,17 @@ export default function ErrandPostForm({ onSuccess }: ErrandPostFormProps) {
             placeholder="What do you need, where, and by when?"
             rows={5}
           />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Price / reward (optional)</label>
+          <Input
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="$10"
+            inputMode="decimal"
+          />
+          <p className="text-xs text-muted-foreground">Leave empty if there’s no payment.</p>
         </div>
 
         <div className="space-y-2">

@@ -23,6 +23,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationsMenu from "@/components/notifications/NotificationsMenu";
 
 const navItems = [
   {
@@ -160,12 +161,7 @@ const Navbar = () => {
             {user ? (
               <>
                 {/* Notifications */}
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="w-5 h-5" />
-                  <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-accent text-accent-foreground">
-                    0
-                  </Badge>
-                </Button>
+                <NotificationsMenu />
 
                 {/* Profile Dropdown */}
                 <DropdownMenu>

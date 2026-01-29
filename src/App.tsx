@@ -11,6 +11,7 @@ import Carpooling from "./pages/Carpooling";
 import Errands from "./pages/Errands";
 import Help from "./pages/Help";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const AppRoutes = () => {
       <Route path="/errands" element={<ProtectedRoute><Errands /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/users/:profileId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       
       {/* Redirects for old routes */}
       <Route path="/rides" element={<Navigate to="/carpooling?tab=find" replace />} />

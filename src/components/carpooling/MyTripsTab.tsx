@@ -309,14 +309,27 @@ const MyTripsTab = ({ onOfferRide, onFindRides }: MyTripsTabProps) => {
                               className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
                             >
                               <div className="flex items-center gap-3">
-                                <Avatar>
-                                  <AvatarImage src={request.passenger.avatar_url || undefined} />
-                                  <AvatarFallback className="bg-primary text-primary-foreground">
-                                    {getInitials(request.passenger.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
+                                <button
+                                  type="button"
+                                  className="rounded-full"
+                                  aria-label="View passenger profile"
+                                  onClick={() => navigate(`/users/${request.passenger.id}`)}
+                                >
+                                  <Avatar>
+                                    <AvatarImage src={request.passenger.avatar_url || undefined} />
+                                    <AvatarFallback className="bg-primary text-primary-foreground">
+                                      {getInitials(request.passenger.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </button>
                                 <div>
-                                  <p className="font-medium">{request.passenger.full_name || "User"}</p>
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(`/users/${request.passenger.id}`)}
+                                    className="font-medium text-left hover:underline"
+                                  >
+                                    {request.passenger.full_name || "User"}
+                                  </button>
                                   <p className="text-sm text-muted-foreground">
                                     {request.passenger.trips_completed} trips
                                   </p>
@@ -364,15 +377,22 @@ const MyTripsTab = ({ onOfferRide, onFindRides }: MyTripsTabProps) => {
                                 key={request.id}
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary"
                               >
-                                <Avatar className="w-6 h-6">
-                                  <AvatarImage src={request.passenger.avatar_url || undefined} />
-                                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                                    {getInitials(request.passenger.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm font-medium">
-                                  {request.passenger.full_name || "User"}
-                                </span>
+                                <button
+                                  type="button"
+                                  className="flex items-center gap-2"
+                                  onClick={() => navigate(`/users/${request.passenger.id}`)}
+                                  aria-label="View passenger profile"
+                                >
+                                  <Avatar className="w-6 h-6">
+                                    <AvatarImage src={request.passenger.avatar_url || undefined} />
+                                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                      {getInitials(request.passenger.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-sm font-medium hover:underline">
+                                    {request.passenger.full_name || "User"}
+                                  </span>
+                                </button>
                               </div>
                             ))}
                           </div>
@@ -450,14 +470,27 @@ const MyTripsTab = ({ onOfferRide, onFindRides }: MyTripsTabProps) => {
 
                       <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                         <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={ride.driver.avatar_url || undefined} />
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                              {getInitials(ride.driver.full_name)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <button
+                            type="button"
+                            className="rounded-full"
+                            aria-label="View driver profile"
+                            onClick={() => navigate(`/users/${ride.driver.id}`)}
+                          >
+                            <Avatar>
+                              <AvatarImage src={ride.driver.avatar_url || undefined} />
+                              <AvatarFallback className="bg-primary text-primary-foreground">
+                                {getInitials(ride.driver.full_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </button>
                           <div>
-                            <p className="font-medium">{ride.driver.full_name || "Driver"}</p>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/users/${ride.driver.id}`)}
+                              className="font-medium text-left hover:underline"
+                            >
+                              {ride.driver.full_name || "Driver"}
+                            </button>
                             <p className="text-sm text-muted-foreground">Driver</p>
                           </div>
                         </div>

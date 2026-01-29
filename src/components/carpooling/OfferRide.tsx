@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { parseMoneyToCents } from "@/lib/money";
 
 const formSchema = z.object({
   from_location: z.string().min(2, "Please enter a starting location"),
@@ -26,6 +27,7 @@ const formSchema = z.object({
   total_seats: z.number().min(1).max(8),
   notes: z.string().optional(),
   campus_id: z.string().optional(),
+  price: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -87,6 +89,8 @@ const OfferRide = ({ onSuccess }: OfferRideProps) => {
     setLoading(true);
 
     try {
+      const price_cents = parseMoneyToCents(formData.price ?? "");
+
       const { error } = await supabase.from("travel_posts").insert({
         driver_id: profile.id,
         from_location: formData.from_location!,
@@ -98,6 +102,7 @@ const OfferRide = ({ onSuccess }: OfferRideProps) => {
         available_seats: formData.total_seats!,
         notes: formData.notes || null,
         campus_id: formData.campus_id || null,
+        price_cents,
       });
 
       if (error) throw error;
@@ -112,6 +117,7 @@ const OfferRide = ({ onSuccess }: OfferRideProps) => {
         transport_mode: "car",
         total_seats: 4,
         campus_id: profile?.campus_id || undefined,
+        price: "",
       });
 
       onSuccess?.();
@@ -316,6 +322,19 @@ const OfferRide = ({ onSuccess }: OfferRideProps) => {
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
               />
+            </div>
+
+            {/* Price */}
+            <div className="space-y-2">
+              <Label htmlFor="price">Price (optional)</Label>
+              <Input
+                id="price"
+                inputMode="decimal"
+                placeholder="$5"
+                value={formData.price || ""}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Leave empty if it’s free.</p>
             </div>
 
             {/* Submit */}
