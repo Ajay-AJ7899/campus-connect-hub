@@ -330,7 +330,7 @@ const OfferRide = ({ onSuccess }: OfferRideProps) => {
               <Input
                 id="price"
                 inputMode="decimal"
-                placeholder="$5"
+                placeholder="₹50"
                 value={formData.price || ""}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               />

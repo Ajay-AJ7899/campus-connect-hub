@@ -12,6 +12,7 @@ import Errands from "./pages/Errands";
 import Help from "./pages/Help";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const AppRoutes = () => {
       <Route path="/carpooling" element={<ProtectedRoute><Carpooling /></ProtectedRoute>} />
       <Route path="/errands" element={<ProtectedRoute><Errands /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/users/:profileId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       

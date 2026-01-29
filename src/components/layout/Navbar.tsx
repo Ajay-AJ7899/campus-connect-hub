@@ -24,6 +24,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationsMenu from "@/components/notifications/NotificationsMenu";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const navItems = [
   {
@@ -69,6 +70,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, profile, signOut } = useAuth();
+  const { data: isAdmin } = useIsAdmin(Boolean(user));
 
   const isActive = (path: string) => location.pathname.startsWith(path.split("?")[0]);
 
@@ -187,6 +189,15 @@ const Navbar = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
+
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer">
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />

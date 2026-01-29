@@ -172,7 +172,7 @@ export default function ErrandPostForm({ onSuccess }: ErrandPostFormProps) {
           <Input
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            placeholder="$10"
+            placeholder="₹100"
             inputMode="decimal"
           />
           <p className="text-xs text-muted-foreground">Leave empty if there’s no payment.</p>
