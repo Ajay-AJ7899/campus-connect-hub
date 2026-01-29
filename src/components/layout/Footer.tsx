@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart, Github, Twitter, Instagram } from "lucide-react";
+import logo from "@/assets/brand-logo.png";
 
 const Footer = () => {
   return (
@@ -10,7 +11,12 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-                <span className="text-xl font-bold text-primary-foreground">C</span>
+                <img
+                  src={logo}
+                  alt="Campus ONE logo"
+                  className="w-8 h-8 object-contain drop-shadow-sm contrast-125"
+                  loading="lazy"
+                />
               </div>
               <span className="text-xl font-bold gradient-text">Campus ONE</span>
             </Link>

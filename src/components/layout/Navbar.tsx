@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logo from "@/assets/brand-logo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,7 +94,12 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow-sm">
-              <span className="text-xl font-bold text-primary-foreground">C</span>
+              <img
+                src={logo}
+                alt="Campus ONE logo"
+                className="w-8 h-8 object-contain drop-shadow-sm contrast-125"
+                loading="eager"
+              />
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:block">
               Campus ONE

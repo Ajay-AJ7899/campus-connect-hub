@@ -14,6 +14,7 @@ import Admin from "./pages/Admin";
 import AdminInvite from "./pages/AdminInvite";
 import UniversityRequest from "./pages/UniversityRequest";
 import NotFound from "./pages/NotFound";
+import logo from "@/assets/brand-logo.png";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +26,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <span className="text-xl font-bold text-primary-foreground">C</span>
+          <img
+            src={logo}
+            alt="Campus ONE logo"
+            className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
+            loading="eager"
+          />
         </div>
       </div>
     );
@@ -45,7 +51,12 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <span className="text-xl font-bold text-primary-foreground">C</span>
+          <img
+            src={logo}
+            alt="Campus ONE logo"
+            className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
+            loading="eager"
+          />
         </div>
       </div>
     );
@@ -64,7 +75,12 @@ const AppRoutes = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <span className="text-xl font-bold text-primary-foreground">C</span>
+          <img
+            src={logo}
+            alt="Campus ONE logo"
+            className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
+            loading="eager"
+          />
         </div>
       </div>
     );

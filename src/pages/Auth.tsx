@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import AuthHero from "@/components/auth/AuthHero";
+import logo from "@/assets/brand-logo.png";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -138,7 +139,12 @@ const Auth = () => {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-12">
             <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-              <Car className="w-6 h-6 text-primary-foreground" />
+              <img
+                src={logo}
+                alt="Campus ONE logo"
+                className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
+                loading="eager"
+              />
             </div>
             <span className="text-2xl font-extrabold tracking-tight text-foreground">Campus ONE</span>
           </div>
