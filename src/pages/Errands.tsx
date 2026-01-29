@@ -2,45 +2,31 @@ import { useSearchParams } from "react-router-dom";
 import { ShoppingBag, Plus, Users, ClipboardList } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import FeatureHubHeader from "@/components/common/FeatureHubHeader";
+import ComingSoonPlaceholder from "@/components/common/ComingSoonPlaceholder";
+import ErrandsFeed from "@/components/errands/ErrandsFeed";
+import ErrandPostForm from "@/components/errands/ErrandPostForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Errands = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get("tab") || "browse";
+  const { profile } = useAuth();
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
   };
 
-  const ComingSoonPlaceholder = ({ title, description, icon: Icon }: { title: string; description: string; icon: React.ComponentType<{ className?: string }> }) => (
-    <div className="text-center py-16">
-      <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-        <Icon className="w-10 h-10 text-muted-foreground" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground mb-6 max-w-md mx-auto">{description}</p>
-      <Button variant="outline" disabled>
-        Coming Soon
-      </Button>
-    </div>
-  );
-
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Errands & Orders</h1>
-              <p className="text-muted-foreground">Get help with tasks and group orders</p>
-            </div>
-          </div>
-        </div>
+        <FeatureHubHeader
+          title="Errands"
+          subtitle="Get help with tasks and quick pickups"
+          icon={ShoppingBag}
+          badgeTone="warning"
+          badgeClassName="gradient-warm"
+        />
 
         {/* Tabs */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8">
@@ -64,35 +50,25 @@ const Errands = () => {
           </TabsList>
 
           <TabsContent value="browse">
-            <ComingSoonPlaceholder 
-              title="Browse Errands" 
-              description="See errands others need help with. Pick up items, deliver packages, or help with tasks around campus."
-              icon={ShoppingBag}
-            />
+            <ErrandsFeed mode="feed" />
           </TabsContent>
 
           <TabsContent value="post">
-            <ComingSoonPlaceholder 
-              title="Post an Errand" 
-              description="Need help with something? Post your errand and let others on campus help you out."
-              icon={Plus}
-            />
+            <ErrandPostForm onSuccess={() => handleTabChange("browse")} />
           </TabsContent>
 
           <TabsContent value="orders">
-            <ComingSoonPlaceholder 
-              title="Group Orders" 
-              description="Join group food orders to save on delivery fees. Or create your own order for others to join."
-              icon={Users}
-            />
+            <div>
+              <ComingSoonPlaceholder
+                title="Group Orders"
+                description="Join group food orders to save on delivery fees. Or create your own order for others to join."
+                icon={Users}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="my-requests">
-            <ComingSoonPlaceholder 
-              title="My Requests" 
-              description="Track your posted errands and tasks you've accepted from others."
-              icon={ClipboardList}
-            />
+            <ErrandsFeed mode="mine" requesterProfileId={profile?.id} />
           </TabsContent>
         </Tabs>
       </div>

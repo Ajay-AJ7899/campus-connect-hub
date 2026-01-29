@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FindRides from "@/components/carpooling/FindRides";
 import OfferRide from "@/components/carpooling/OfferRide";
 import MyTripsTab from "@/components/carpooling/MyTripsTab";
+import FeatureHubHeader from "@/components/common/FeatureHubHeader";
 
 const Carpooling = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,18 +18,12 @@ const Carpooling = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-              <Car className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Carpooling</h1>
-              <p className="text-muted-foreground">Share rides with fellow students</p>
-            </div>
-          </div>
-        </div>
+        <FeatureHubHeader
+          title="Carpooling"
+          subtitle="Share rides with fellow students"
+          icon={Car}
+          badgeTone="primary"
+        />
 
         {/* Tabs */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8">
