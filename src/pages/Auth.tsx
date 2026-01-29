@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import AuthHero from "@/components/auth/AuthHero";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -139,15 +140,15 @@ const Auth = () => {
             <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
               <Car className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">Campus ONE</span>
+            <span className="text-2xl font-extrabold tracking-tight text-foreground">Campus ONE</span>
           </div>
 
           {/* Heading */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-2">
               {isLogin ? "Welcome Back!" : "Join Us Today"}
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-lg font-medium">
               {isLogin
                 ? "Sign in to continue your journey"
                 : "Create an account to get started"}
@@ -282,65 +283,8 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Right Side - Hero Visual */}
-      <div className="hidden lg:flex w-1/2 gradient-hero relative overflow-hidden">
-        {/* Pattern overlay */}
-        <div className="absolute inset-0 pattern-dots opacity-30" />
-        
-        {/* Decorative circles */}
-        <div className="absolute top-20 right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-32 left-10 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full" />
-        
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-          <div className="animate-slide-up">
-            <h2 className="text-4xl xl:text-5xl font-bold leading-tight mb-6">
-              Your Campus<br />
-              Network,<br />
-              <span className="text-white/90">One Click Away</span>
-            </h2>
-            
-            <p className="text-xl text-white/80 mb-10 max-w-md">
-              Join thousands of students sharing rides, saving money, and building connections across campus.
-            </p>
-
-            {/* Feature Pills */}
-            <div className="space-y-4">
-              {features.map((feature, index) => (
-                <div 
-                  key={index}
-                  className="inline-flex items-center gap-3 bg-white/15 backdrop-blur-sm rounded-full px-5 py-3 mr-3 mb-2"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <feature.icon className="w-5 h-5" />
-                  <span className="font-medium">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-16 flex gap-12">
-            <div>
-              <div className="text-4xl font-bold">500+</div>
-              <div className="text-white/70">Active Riders</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold">15</div>
-              <div className="text-white/70">Campuses</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold">2K+</div>
-              <div className="text-white/70">Trips Shared</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Floating elements */}
-        <div className="absolute bottom-20 right-20 w-20 h-20 bg-white/20 rounded-2xl rotate-12 animate-float" />
-        <div className="absolute top-40 right-40 w-12 h-12 bg-white/15 rounded-xl -rotate-12 animate-float" style={{ animationDelay: "1s" }} />
-      </div>
+      {/* Right Side - Theme-aware Video Hero */}
+      <AuthHero />
     </div>
   );
 };
