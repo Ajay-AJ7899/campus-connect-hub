@@ -16,8 +16,8 @@ const Footer = React.forwardRef<HTMLElement>((_, ref) => {
               <span className="text-xl font-bold gradient-text">Campus ONE</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-sm">
-              Connecting campus communities for carpooling, errands, and emergencies. 
-              Travel together, save money, make friends.
+              Connecting campus communities for carpooling, errands, and emergencies. Travel together, save money, make
+              friends.
             </p>
           </div>
 
@@ -68,30 +68,16 @@ const Footer = React.forwardRef<HTMLElement>((_, ref) => {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            Made with <Heart className="w-4 h-4 text-destructive fill-destructive" /> for campus communities
-          </p>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">Made by AJAY & SUPRAJ</p>
 
           <div className="flex items-center gap-4">
-            <a
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="Twitter"
-            >
+            <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
               <Twitter className="w-5 h-5" />
             </a>
-            <a
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="Instagram"
-            >
+            <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
               <Instagram className="w-5 h-5" />
             </a>
-            <a
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="GitHub"
-            >
+            <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="GitHub">
               <Github className="w-5 h-5" />
             </a>
           </div>
