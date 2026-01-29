@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import RequestMessageDialog from "@/components/common/RequestMessageDialog";
 
 interface TravelPost {
   id: string;
@@ -56,6 +57,7 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
   const [searchTo, setSearchTo] = useState("");
   const [campusFilter, setCampusFilter] = useState<string>("all");
   const [requestingId, setRequestingId] = useState<string | null>(null);
+  const [requestDialogPostId, setRequestDialogPostId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRides();
@@ -89,7 +91,7 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
     }
   };
 
-  const handleRequestToJoin = async (postId: string) => {
+  const handleRequestToJoinClick = (postId: string) => {
     if (!user || !profile) {
       toast({
         variant: "destructive",
@@ -100,12 +102,20 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
       return;
     }
 
+    setRequestDialogPostId(postId);
+  };
+
+  const submitRideRequest = async (message: string) => {
+    const postId = requestDialogPostId;
+    if (!postId || !profile) return;
+
     setRequestingId(postId);
 
     try {
       const { error } = await supabase.from("carpool_requests").insert({
         travel_post_id: postId,
         passenger_id: profile.id,
+        message,
       });
 
       if (error) {
@@ -123,6 +133,7 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
           title: "Request sent! 🎉",
           description: "The driver will be notified of your request.",
         });
+        setRequestDialogPostId(null);
       }
     } catch (err) {
       toast({
@@ -152,6 +163,18 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
 
   return (
     <div>
+      <RequestMessageDialog
+        open={requestDialogPostId !== null}
+        onOpenChange={(open) => {
+          if (!open) setRequestDialogPostId(null);
+        }}
+        title="Request to join ride"
+        description="Send a quick one-line message to the driver."
+        submitLabel="Send request"
+        loading={requestDialogPostId !== null && requestingId === requestDialogPostId}
+        onSubmit={submitRideRequest}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
@@ -329,7 +352,7 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
                         : "gradient-primary text-primary-foreground"
                     )}
                     disabled={isOwnRide || ride.available_seats === 0 || requestingId === ride.id}
-                    onClick={() => handleRequestToJoin(ride.id)}
+                    onClick={() => handleRequestToJoinClick(ride.id)}
                   >
                     {requestingId === ride.id ? (
                       <>

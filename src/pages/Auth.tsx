@@ -21,7 +21,7 @@ const LAST_CAMPUS_KEY = "campus_one:last_campus_id";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp } = useAuth();
+  const { user, profile, signIn, signUp, updateProfile } = useAuth();
   const { toast } = useToast();
 
   const [isLogin, setIsLogin] = useState(true);
@@ -88,7 +88,9 @@ const Auth = () => {
     // Persist for the next person/session on this device.
     localStorage.setItem(LAST_CAMPUS_KEY, selectedCampusId);
 
-    // If the user is authenticated, store it in their profile for campus-scoped features.
+    // Campus lock:
+    // - If profile already has campus_id, do NOT overwrite it on sign-in.
+    // - If campus_id is empty (new user or legacy account), set it.
     const { data, error } = await supabase.auth.getUser();
     if (error) {
       console.warn("Could not read current user for campus update:", error);
@@ -98,6 +100,22 @@ const Auth = () => {
     const userId = data.user?.id;
     if (!userId) return;
 
+    const { data: existingProfile, error: readErr } = await supabase
+      .from("profiles")
+      .select("campus_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (readErr) {
+      console.warn("Could not read profile campus:", readErr);
+      return;
+    }
+
+    if (existingProfile?.campus_id) {
+      // Locked: do not overwrite.
+      return;
+    }
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ campus_id: selectedCampusId })
@@ -105,6 +123,12 @@ const Auth = () => {
 
     if (updateError) {
       console.warn("Could not update profile campus:", updateError);
+      return;
+    }
+
+    // Sync in-app profile state immediately if available.
+    if (!profile?.campus_id) {
+      await updateProfile({ campus_id: selectedCampusId });
     }
   };
 
