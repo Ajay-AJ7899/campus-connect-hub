@@ -212,6 +212,57 @@ export type Database = {
           },
         ]
       }
+      contact_requests: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          message: string
+          owner_profile_id: string
+          requester_profile_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          message: string
+          owner_profile_id: string
+          requester_profile_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          message?: string
+          owner_profile_id?: string
+          requester_profile_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_requests_owner_profile_id_fkey"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_requests_requester_profile_id_fkey"
+            columns: ["requester_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       errand_photos: {
         Row: {
           created_at: string
@@ -344,7 +395,10 @@ export type Database = {
           creator_profile_id: string
           deadline_at: string | null
           description: string
+          expires_at: string
           id: string
+          order_for_at: string | null
+          restaurant_name: string | null
           status: string
           title: string
           updated_at: string
@@ -355,7 +409,10 @@ export type Database = {
           creator_profile_id: string
           deadline_at?: string | null
           description: string
+          expires_at?: string
           id?: string
+          order_for_at?: string | null
+          restaurant_name?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -366,7 +423,10 @@ export type Database = {
           creator_profile_id?: string
           deadline_at?: string | null
           description?: string
+          expires_at?: string
           id?: string
+          order_for_at?: string | null
+          restaurant_name?: string | null
           status?: string
           title?: string
           updated_at?: string
