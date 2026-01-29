@@ -60,10 +60,6 @@ const Index = () => {
         {/* Gradient Overlay for Text Readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
         
-        {/* Decorative Elements */}
-        <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-[hsl(30,100%,90%)] opacity-40 animate-float z-10" />
-        <div className="absolute bottom-20 left-10 w-24 h-24 rounded-full bg-[hsl(210,100%,90%)] opacity-30 animate-bounce-gentle z-10" style={{ animationDelay: "0.5s" }} />
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-[hsl(0,80%,92%)] opacity-30 animate-float z-10" style={{ animationDelay: "1s" }} />
         
         <div className="container mx-auto px-4 py-16 md:py-20 relative z-20">
           <div className="max-w-3xl mx-auto text-center">
@@ -76,14 +72,14 @@ const Index = () => {
             )}
 
             {/* Main Heading - Big Typography */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5 text-foreground animate-slide-up leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-5 text-foreground animate-slide-up leading-tight tracking-tight">
               Smarter Campus Life,{" "}
               <span className="gradient-text">Safer Together</span>
             </h1>
 
             {/* Subheading */}
             <p 
-              className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto animate-slide-up leading-relaxed"
+              className="text-lg md:text-xl text-muted-foreground/90 mb-8 max-w-xl mx-auto animate-slide-up leading-relaxed font-medium tracking-wide"
               style={{ animationDelay: "0.15s" }}
             >
               Travel, errands, and emergency help — all in one place.
