@@ -96,7 +96,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow-sm">
+            <div className="w-10 h-10 rounded-xl bg-card/70 border border-border/60 flex items-center justify-center shadow-float">
               <img
                 src={logo}
                 alt="Campus ONE logo"
