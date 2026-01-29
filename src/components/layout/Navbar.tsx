@@ -191,12 +191,6 @@ const Navbar = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/carpooling?tab=trips" className="cursor-pointer">
-                        <Car className="w-4 h-4 mr-2" />
-                        My Trips
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />
