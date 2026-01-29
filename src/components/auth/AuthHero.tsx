@@ -1,5 +1,4 @@
 import heroVideo from "/videos/hero-video.mp4";
-import logo from "@/assets/brand-logo.png";
 
 const AuthHero = () => {
   return (
@@ -26,15 +25,9 @@ const AuthHero = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center px-16">
         <div className="animate-slide-up">
-            <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur-md shadow-float">
-              <img
-                src={logo}
-                alt="Campus ONE logo"
-                className="h-5 w-5 object-contain drop-shadow-sm contrast-125"
-                loading="lazy"
-              />
-              Campus ONE • Smart matching
-            </p>
+          <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur-md shadow-float">
+            Campus ONE • Smart matching
+          </p>
 
           <h2 className="mt-6 text-4xl xl:text-6xl font-extrabold leading-[1.02] tracking-tight text-foreground">
             Your campus rides,

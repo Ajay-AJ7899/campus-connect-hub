@@ -43,103 +43,6 @@ export type Database = {
           },
         ]
       }
-      admin_invites: {
-        Row: {
-          campus_id: string
-          code: string
-          created_at: string
-          created_by: string
-          expires_at: string
-          id: string
-          used_at: string | null
-          used_by: string | null
-        }
-        Insert: {
-          campus_id: string
-          code: string
-          created_at?: string
-          created_by: string
-          expires_at?: string
-          id?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Update: {
-          campus_id?: string
-          code?: string
-          created_at?: string
-          created_by?: string
-          expires_at?: string
-          id?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_invites_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "campuses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      campus_requests: {
-        Row: {
-          city: string
-          country: string
-          created_at: string
-          created_campus_id: string | null
-          id: string
-          name: string
-          requester_user_id: string
-          review_notes: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          state: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          city: string
-          country?: string
-          created_at?: string
-          created_campus_id?: string | null
-          id?: string
-          name: string
-          requester_user_id: string
-          review_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          state?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          city?: string
-          country?: string
-          created_at?: string
-          created_campus_id?: string | null
-          id?: string
-          name?: string
-          requester_user_id?: string
-          review_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          state?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "campus_requests_created_campus_id_fkey"
-            columns: ["created_campus_id"]
-            isOneToOne: false
-            referencedRelation: "campuses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       campuses: {
         Row: {
           city: string
@@ -517,7 +420,6 @@ export type Database = {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
-      redeem_admin_invite: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
       app_role: "super_admin" | "admin"

@@ -10,11 +10,7 @@ import Auth from "./pages/Auth";
 import Carpooling from "./pages/Carpooling";
 import Errands from "./pages/Errands";
 import Help from "./pages/Help";
-import Admin from "./pages/Admin";
-import AdminInvite from "./pages/AdminInvite";
-import UniversityRequest from "./pages/UniversityRequest";
 import NotFound from "./pages/NotFound";
-import logo from "@/assets/brand-logo.png";
 
 const queryClient = new QueryClient();
 
@@ -26,12 +22,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <img
-            src={logo}
-            alt="Campus ONE logo"
-            className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
-            loading="eager"
-          />
+          <span className="text-xl font-bold text-primary-foreground">C</span>
         </div>
       </div>
     );
@@ -44,30 +35,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isAdmin } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <img
-            src={logo}
-            alt="Campus ONE logo"
-            className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
-            loading="eager"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) return <Navigate to="/" replace />;
-  if (!isAdmin) return <Navigate to="/home" replace />;
-
-  return <>{children}</>;
-};
-
 const AppRoutes = () => {
   const { user, loading } = useAuth();
 
@@ -75,12 +42,7 @@ const AppRoutes = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <img
-            src={logo}
-            alt="Campus ONE logo"
-            className="w-9 h-9 object-contain drop-shadow-sm contrast-125"
-            loading="eager"
-          />
+          <span className="text-xl font-bold text-primary-foreground">C</span>
         </div>
       </div>
     );
@@ -97,9 +59,6 @@ const AppRoutes = () => {
       <Route path="/carpooling" element={<ProtectedRoute><Carpooling /></ProtectedRoute>} />
       <Route path="/errands" element={<ProtectedRoute><Errands /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
-      <Route path="/university-request" element={<ProtectedRoute><UniversityRequest /></ProtectedRoute>} />
-      <Route path="/admin-invite" element={<ProtectedRoute><AdminInvite /></ProtectedRoute>} />
-      <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
       
       {/* Redirects for old routes */}
       <Route path="/rides" element={<Navigate to="/carpooling?tab=find" replace />} />

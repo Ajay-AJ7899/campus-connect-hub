@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Bell, User, Car, ShoppingBag, Shield, LogOut, Plus, ChevronDown, MapPin, Users, AlertTriangle, ClipboardList, Moon, Sun, LayoutDashboard, Ticket } from "lucide-react";
+import { Menu, X, Bell, User, Car, ShoppingBag, Shield, LogOut, Plus, ChevronDown, MapPin, Users, AlertTriangle, ClipboardList, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logo from "@/assets/brand-logo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +67,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { user, profile, signOut, isAdmin } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   const isActive = (path: string) => location.pathname.startsWith(path.split("?")[0]);
 
@@ -94,12 +93,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow-sm">
-              <img
-                src={logo}
-                alt="Campus ONE logo"
-                className="w-8 h-8 object-contain drop-shadow-sm contrast-125"
-                loading="eager"
-              />
+              <span className="text-xl font-bold text-primary-foreground">C</span>
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:block">
               Campus ONE
@@ -197,22 +191,6 @@ const Navbar = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin-invite" className="cursor-pointer">
-                        <Ticket className="w-4 h-4 mr-2" />
-                        Redeem Admin Invite
-                      </Link>
-                    </DropdownMenuItem>
-
-                    {isAdmin && (
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="cursor-pointer">
-                          <LayoutDashboard className="w-4 h-4 mr-2" />
-                          Admin Portal
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/carpooling?tab=trips" className="cursor-pointer">
                         <Car className="w-4 h-4 mr-2" />
