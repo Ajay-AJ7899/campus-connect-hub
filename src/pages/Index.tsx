@@ -5,55 +5,40 @@ import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
 import FeatureCards from "@/components/home/FeatureCards";
 import { useAuth } from "@/contexts/AuthContext";
-
 const Index = () => {
-  const { profile } = useAuth();
-
-  const benefits = [
-    {
-      icon: Car,
-      title: "Smart Carpooling",
-      description: "Find rides going your way with intelligent route matching.",
-    },
-    {
-      icon: Users,
-      title: "Campus Community",
-      description: "Connect with verified students from your campus.",
-    },
-    {
-      icon: Clock,
-      title: "Real-time Updates",
-      description: "Get instant notifications for ride requests and updates.",
-    },
-    {
-      icon: MapPin,
-      title: "Multi-Campus",
-      description: "Commute across town or to another campus seamlessly.",
-    },
-    {
-      icon: Sparkles,
-      title: "Quick Matching",
-      description: "Smart algorithm finds the best matches for your route.",
-    },
-    {
-      icon: TrendingUp,
-      title: "Save Money",
-      description: "Split costs and save up to 60% on your daily commute.",
-    },
-  ];
-
-  return (
-    <Layout>
+  const {
+    profile
+  } = useAuth();
+  const benefits = [{
+    icon: Car,
+    title: "Smart Carpooling",
+    description: "Find rides going your way with intelligent route matching."
+  }, {
+    icon: Users,
+    title: "Campus Community",
+    description: "Connect with verified students from your campus."
+  }, {
+    icon: Clock,
+    title: "Real-time Updates",
+    description: "Get instant notifications for ride requests and updates."
+  }, {
+    icon: MapPin,
+    title: "Multi-Campus",
+    description: "Commute across town or to another campus seamlessly."
+  }, {
+    icon: Sparkles,
+    title: "Quick Matching",
+    description: "Smart algorithm finds the best matches for your route."
+  }, {
+    icon: TrendingUp,
+    title: "Save Money",
+    description: "Split costs and save up to 60% on your daily commute."
+  }];
+  return <Layout>
       {/* Hero Section - Video Background */}
       <section className="relative overflow-hidden min-h-[60vh] flex items-center">
         {/* Video Background */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src="/videos/hero-video.mp4" type="video/mp4" />
         </video>
         
@@ -64,12 +49,10 @@ const Index = () => {
         <div className="container mx-auto px-4 py-16 md:py-20 relative z-20">
           <div className="max-w-3xl mx-auto text-center">
             {/* Greeting */}
-            {profile?.full_name && (
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-float text-sm font-semibold mb-6 animate-fade-in">
+            {profile?.full_name && <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-float text-sm font-semibold mb-6 animate-fade-in">
                 <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
                 <span className="text-black font-bold">Welcome back, {profile.full_name.split(' ')[0]}! 👋</span>
-              </div>
-            )}
+              </div>}
 
             {/* Main Heading - Big Typography */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-5 text-foreground animate-slide-up leading-tight tracking-tight">
@@ -78,10 +61,9 @@ const Index = () => {
             </h1>
 
             {/* Subheading */}
-            <p 
-              className="text-lg md:text-xl text-muted-foreground/90 mb-8 max-w-xl mx-auto animate-slide-up leading-relaxed font-medium tracking-wide"
-              style={{ animationDelay: "0.15s" }}
-            >
+            <p className="text-lg md:text-xl text-muted-foreground/90 mb-8 max-w-xl mx-auto animate-slide-up leading-relaxed font-medium tracking-wide" style={{
+            animationDelay: "0.15s"
+          }}>
               Travel, errands, and emergency help — all in one place.
             </p>
           </div>
@@ -107,12 +89,9 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {benefits.map((benefit, index) => (
-              <Card 
-                key={benefit.title} 
-                className="group bg-card border-0 shadow-float card-float rounded-2xl animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+            {benefits.map((benefit, index) => <Card key={benefit.title} className="group bg-card border-0 shadow-float card-float rounded-2xl animate-fade-in-up" style={{
+            animationDelay: `${index * 0.1}s`
+          }}>
                 <CardContent className="p-6">
                   <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <benefit.icon className="w-7 h-7 text-primary" strokeWidth={1.5} />
@@ -120,8 +99,7 @@ const Index = () => {
                   <h3 className="text-lg font-bold mb-2 text-foreground">{benefit.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{benefit.description}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -132,7 +110,7 @@ const Index = () => {
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white shadow-float text-sm font-semibold mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-foreground">Ready to ride?</span>
+              <span className="text-secondary">Ready to ride?</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-5 text-foreground">
               Start Your Journey Today
@@ -141,10 +119,7 @@ const Index = () => {
               Find your first ride in seconds. No hassle, just hop in and go.
             </p>
             <Link to="/carpooling">
-              <Button 
-                size="lg" 
-                className="gradient-primary text-primary-foreground text-lg px-10 py-6 rounded-2xl shadow-glow hover:shadow-glow-lg transition-all duration-300 font-semibold"
-              >
+              <Button size="lg" className="gradient-primary text-primary-foreground text-lg px-10 py-6 rounded-2xl shadow-glow hover:shadow-glow-lg transition-all duration-300 font-semibold">
                 Explore Rides
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
@@ -152,8 +127,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Index;
