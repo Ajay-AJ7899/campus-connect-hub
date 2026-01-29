@@ -44,14 +44,28 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Hero Section - Soft Gradient Background */}
-      <section className="relative overflow-hidden gradient-hero min-h-[50vh] flex items-center">
-        {/* Decorative Elements */}
-        <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-[hsl(30,100%,90%)] opacity-60 animate-float" />
-        <div className="absolute bottom-20 left-10 w-24 h-24 rounded-full bg-[hsl(210,100%,90%)] opacity-50 animate-bounce-gentle" style={{ animationDelay: "0.5s" }} />
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-[hsl(0,80%,92%)] opacity-40 animate-float" style={{ animationDelay: "1s" }} />
+      {/* Hero Section - Video Background */}
+      <section className="relative overflow-hidden min-h-[60vh] flex items-center">
+        {/* Video Background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/videos/hero-video.mp4" type="video/mp4" />
+        </video>
         
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
+        {/* Gradient Overlay for Text Readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
+        
+        {/* Decorative Elements */}
+        <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-[hsl(30,100%,90%)] opacity-40 animate-float z-10" />
+        <div className="absolute bottom-20 left-10 w-24 h-24 rounded-full bg-[hsl(210,100%,90%)] opacity-30 animate-bounce-gentle z-10" style={{ animationDelay: "0.5s" }} />
+        <div className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-[hsl(0,80%,92%)] opacity-30 animate-float z-10" style={{ animationDelay: "1s" }} />
+        
+        <div className="container mx-auto px-4 py-16 md:py-20 relative z-20">
           <div className="max-w-3xl mx-auto text-center">
             {/* Greeting */}
             {profile?.full_name && (
