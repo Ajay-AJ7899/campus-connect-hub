@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_campuses: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_campuses_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campuses: {
         Row: {
           city: string
@@ -86,6 +115,91 @@ export type Database = {
           },
         ]
       }
+      help_ticket_locations: {
+        Row: {
+          captured_at: string
+          expires_at: string
+          id: string
+          lat: number
+          lng: number
+          ticket_id: string
+        }
+        Insert: {
+          captured_at?: string
+          expires_at?: string
+          id?: string
+          lat: number
+          lng: number
+          ticket_id: string
+        }
+        Update: {
+          captured_at?: string
+          expires_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_ticket_locations_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "help_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      help_tickets: {
+        Row: {
+          acknowledged_by: string | null
+          campus_id: string
+          category: Database["public"]["Enums"]["help_ticket_category"]
+          created_at: string
+          description: string
+          id: string
+          requester_user_id: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["help_ticket_status"]
+          updated_at: string
+          urgency: Database["public"]["Enums"]["help_ticket_urgency"]
+        }
+        Insert: {
+          acknowledged_by?: string | null
+          campus_id: string
+          category: Database["public"]["Enums"]["help_ticket_category"]
+          created_at?: string
+          description: string
+          id?: string
+          requester_user_id: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["help_ticket_status"]
+          updated_at?: string
+          urgency: Database["public"]["Enums"]["help_ticket_urgency"]
+        }
+        Update: {
+          acknowledged_by?: string | null
+          campus_id?: string
+          category?: Database["public"]["Enums"]["help_ticket_category"]
+          created_at?: string
+          description?: string
+          id?: string
+          requester_user_id?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["help_ticket_status"]
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["help_ticket_urgency"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_tickets_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campuses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -93,6 +207,7 @@ export type Database = {
           is_read: boolean
           message: string
           related_post_id: string | null
+          related_ticket_id: string | null
           title: string
           type: string
           user_id: string
@@ -103,6 +218,7 @@ export type Database = {
           is_read?: boolean
           message: string
           related_post_id?: string | null
+          related_ticket_id?: string | null
           title: string
           type: string
           user_id: string
@@ -113,6 +229,7 @@ export type Database = {
           is_read?: boolean
           message?: string
           related_post_id?: string | null
+          related_ticket_id?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -123,6 +240,13 @@ export type Database = {
             columns: ["related_post_id"]
             isOneToOne: false
             referencedRelation: "travel_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_related_ticket_id_fkey"
+            columns: ["related_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "help_tickets"
             referencedColumns: ["id"]
           },
           {
@@ -250,15 +374,63 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_ticket: {
+        Args: { _ticket_id: string; _user_id: string }
+        Returns: boolean
+      }
+      current_user_campus_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_for_campus: {
+        Args: { _campus_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_requester_for_ticket: {
+        Args: { _ticket_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin"
+      help_ticket_category:
+        | "medical"
+        | "safety"
+        | "mental_health"
+        | "lost_item"
+        | "other"
+      help_ticket_status: "open" | "acknowledged" | "in_progress" | "resolved"
+      help_ticket_urgency: "low" | "medium" | "high" | "critical"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -385,6 +557,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin"],
+      help_ticket_category: [
+        "medical",
+        "safety",
+        "mental_health",
+        "lost_item",
+        "other",
+      ],
+      help_ticket_status: ["open", "acknowledged", "in_progress", "resolved"],
+      help_ticket_urgency: ["low", "medium", "high", "critical"],
+    },
   },
 } as const
