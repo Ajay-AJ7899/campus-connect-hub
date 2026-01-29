@@ -302,6 +302,7 @@ export type Database = {
           description: string
           expires_at: string
           id: string
+          price_cents: number | null
           requester_profile_id: string
           status: string
           title: string
@@ -313,6 +314,7 @@ export type Database = {
           description: string
           expires_at?: string
           id?: string
+          price_cents?: number | null
           requester_profile_id: string
           status?: string
           title: string
@@ -324,6 +326,7 @@ export type Database = {
           description?: string
           expires_at?: string
           id?: string
+          price_cents?: number | null
           requester_profile_id?: string
           status?: string
           title?: string
@@ -652,6 +655,7 @@ export type Database = {
           from_location: string
           id: string
           notes: string | null
+          price_cents: number | null
           status: string
           to_location: string
           total_seats: number
@@ -668,6 +672,7 @@ export type Database = {
           from_location: string
           id?: string
           notes?: string | null
+          price_cents?: number | null
           status?: string
           to_location: string
           total_seats?: number
@@ -684,6 +689,7 @@ export type Database = {
           from_location?: string
           id?: string
           notes?: string | null
+          price_cents?: number | null
           status?: string
           to_location?: string
           total_seats?: number

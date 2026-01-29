@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import RequestMessageDialog from "@/components/common/RequestMessageDialog";
+import { formatMoneyFromCents } from "@/lib/money";
 
 interface TravelPost {
   id: string;
@@ -26,6 +27,7 @@ interface TravelPost {
   available_seats: number;
   notes: string | null;
   campus_id: string | null;
+  price_cents?: number | null;
   driver: {
     id: string;
     full_name: string | null;
@@ -311,6 +313,12 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
                       <Users className="w-3 h-3" />
                       {ride.available_seats} {ride.available_seats === 1 ? "seat" : "seats"} left
                     </Badge>
+
+                    {typeof ride.price_cents === "number" && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        {ride.price_cents === 0 ? "Free" : formatMoneyFromCents(ride.price_cents)}
+                      </Badge>
+                    )}
                   </div>
 
                   {/* Notes */}
@@ -322,12 +330,19 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
 
                   {/* Driver */}
                   <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    <Avatar>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/users/${ride.driver.id}`)}
+                      className="rounded-full"
+                      aria-label="View driver profile"
+                    >
+                      <Avatar>
                       <AvatarImage src={ride.driver.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary text-primary-foreground">
                         {getInitials(ride.driver.full_name)}
                       </AvatarFallback>
-                    </Avatar>
+                      </Avatar>
+                    </button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-medium truncate">{ride.driver.full_name || "User"}</p>
@@ -341,6 +356,15 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
                         {ride.driver.trips_completed} trips completed
                       </p>
                     </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/users/${ride.driver.id}`)}
+                    >
+                      View profile
+                    </Button>
                   </div>
                 </CardContent>
                 <CardFooter className="p-4 pt-0">

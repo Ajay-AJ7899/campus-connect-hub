@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 
@@ -12,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 import type { ErrandPhotoRow, ErrandRow } from "./errands.types";
+import { formatMoneyFromCents } from "@/lib/money";
 
 type ErrandsFeedProps = {
   mode: "feed" | "mine";
@@ -19,6 +21,7 @@ type ErrandsFeedProps = {
 };
 
 type ErrandWithPhotos = ErrandRow & { photos: ErrandPhotoRow[] };
+type ErrandWithPhotosAndPrice = ErrandWithPhotos & { price_cents?: number | null };
 
 async function fetchErrands(mode: ErrandsFeedProps["mode"], requesterProfileId?: string | null) {
   const nowIso = new Date().toISOString();
@@ -73,6 +76,7 @@ async function signUrl(path: string) {
 export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedProps) {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [requestErrandId, setRequestErrandId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -201,7 +205,7 @@ export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedPro
       />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {errands.map((e) => {
+      {(errands as ErrandWithPhotosAndPrice[]).map((e) => {
         const isExpired = new Date(e.expires_at) <= now || e.status !== "active";
         const createdLabel = formatDistanceToNowStrict(new Date(e.created_at), { addSuffix: true });
 
@@ -237,6 +241,14 @@ export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedPro
                 )}
               </div>
 
+              {typeof e.price_cents === "number" && (
+                <div className="mt-3">
+                  <Badge variant="secondary">
+                    {e.price_cents === 0 ? "Free" : formatMoneyFromCents(e.price_cents)}
+                  </Badge>
+                </div>
+              )}
+
               <p className="text-sm text-muted-foreground mt-3 line-clamp-4">{e.description}</p>
 
               {mode === "feed" && (
@@ -251,6 +263,14 @@ export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedPro
                     onClick={() => setRequestErrandId(e.id)}
                   >
                     Request
+                  </Button>
+
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    onClick={() => navigate(`/users/${e.requester_profile_id}`)}
+                  >
+                    View profile
                   </Button>
                 </div>
               )}
