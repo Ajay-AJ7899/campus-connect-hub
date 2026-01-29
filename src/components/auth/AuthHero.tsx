@@ -1,17 +1,8 @@
 import heroVideo from "/videos/hero-video.mp4";
-
 const AuthHero = () => {
-  return (
-    <section className="hidden lg:flex w-1/2 relative overflow-hidden">
+  return <section className="hidden lg:flex w-1/2 relative overflow-hidden">
       {/* Video background */}
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        src={heroVideo}
-        autoPlay
-        muted
-        loop
-        playsInline
-      />
+      <video className="absolute inset-0 h-full w-full object-cover" src={heroVideo} autoPlay muted loop playsInline />
 
       {/* Theme-aware overlays */}
       <div className="absolute inset-0 bg-background/40 dark:bg-background/55" />
@@ -29,30 +20,20 @@ const AuthHero = () => {
             Campus ONE • Smart matching
           </p>
 
-          <h2 className="mt-6 text-4xl xl:text-6xl font-extrabold leading-[1.02] tracking-tight text-foreground">
-            Your campus rides,
+          <h2 className="mt-6 xl:text-6xl font-extrabold leading-[1.02] tracking-tight text-foreground text-3xl">
+            One Campus  One Network
             <br />
-            <span className="gradient-text">actually effortless</span>
+            <span className="gradient-text">Unlimited Support</span>
           </h2>
 
-          <p className="mt-6 text-lg xl:text-xl text-foreground/80 max-w-lg">
-            Find verified riders, split costs, and coordinate in minutes—built for students.
+          <p className="mt-6 text-lg xl:text-xl text-foreground/80 max-w-lg font-serif">
+            Your campus community, Powered in real time
           </p>
 
           <div className="mt-10 grid grid-cols-2 gap-3 max-w-lg">
-            {[
-              "Verified profiles",
-              "Live ride updates",
-              "Safer meetups",
-              "Save on trips",
-            ].map((label) => (
-              <div
-                key={label}
-                className="rounded-2xl border border-border/60 bg-card/55 px-4 py-4 text-sm font-semibold text-foreground backdrop-blur-md shadow-float"
-              >
+            {["Verified profiles", "Live ride updates", "Safer meetups", "Save on trips"].map(label => <div key={label} className="rounded-2xl border border-border/60 bg-card/55 px-4 py-4 text-sm font-semibold text-foreground backdrop-blur-md shadow-float">
                 {label}
-              </div>
-            ))}
+              </div>)}
           </div>
 
           <div className="mt-12 flex gap-10">
@@ -71,8 +52,6 @@ const AuthHero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default AuthHero;
