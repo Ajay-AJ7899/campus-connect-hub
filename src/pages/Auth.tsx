@@ -4,15 +4,20 @@ import { Eye, EyeOff, Mail, Lock, User, Loader2, Car, Users, Shield, Sparkles } 
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import AuthHero from "@/components/auth/AuthHero";
+import CampusPicker from "@/components/auth/CampusPicker";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long");
+const campusSchema = z.string().min(1, "Please select your campus");
+
+const LAST_CAMPUS_KEY = "campus_one:last_campus_id";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -27,12 +32,19 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [campusId, setCampusId] = useState("");
 
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
     fullName?: string;
+    campusId?: string;
   }>({});
+
+  useEffect(() => {
+    const saved = localStorage.getItem(LAST_CAMPUS_KEY);
+    if (saved) setCampusId(saved);
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -59,10 +71,41 @@ const Auth = () => {
       if (!nameResult.success) {
         newErrors.fullName = nameResult.error.errors[0].message;
       }
+
+      const campusResult = campusSchema.safeParse(campusId);
+      if (!campusResult.success) {
+        newErrors.campusId = campusResult.error.errors[0].message;
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const applyCampusToProfile = async (selectedCampusId: string) => {
+    if (!selectedCampusId) return;
+
+    // Persist for the next person/session on this device.
+    localStorage.setItem(LAST_CAMPUS_KEY, selectedCampusId);
+
+    // If the user is authenticated, store it in their profile for campus-scoped features.
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.warn("Could not read current user for campus update:", error);
+      return;
+    }
+
+    const userId = data.user?.id;
+    if (!userId) return;
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ campus_id: selectedCampusId })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.warn("Could not update profile campus:", updateError);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,6 +133,9 @@ const Auth = () => {
             });
           }
         } else {
+          // If the user picked a campus here, save it and apply it to the profile.
+          // (Helpful for users whose profile campus is still empty.)
+          await applyCampusToProfile(campusId);
           toast({
             title: "Welcome back! 👋",
             description: "You've successfully signed in.",
@@ -113,6 +159,8 @@ const Auth = () => {
             });
           }
         } else {
+          // Save the campus immediately; once the session exists, also persist it to the profile.
+          await applyCampusToProfile(campusId);
           toast({
             title: "Welcome to Campus ONE! 🎉",
             description: "Your account has been created successfully.",
@@ -179,6 +227,18 @@ const Auth = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Campus (asked on both; required for signup) */}
+            <CampusPicker
+              value={campusId}
+              onChange={(val) => {
+                setCampusId(val);
+                if (val) localStorage.setItem(LAST_CAMPUS_KEY, val);
+              }}
+              required={!isLogin}
+              error={!isLogin ? errors.campusId : undefined}
+              hint={isLogin ? "Optional on sign-in — helps enable campus features immediately." : undefined}
+            />
+
             {/* Full Name (signup only) */}
             {!isLogin && (
               <div className="space-y-2">
