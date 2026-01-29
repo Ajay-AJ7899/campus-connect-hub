@@ -10,6 +10,9 @@ import Auth from "./pages/Auth";
 import Carpooling from "./pages/Carpooling";
 import Errands from "./pages/Errands";
 import Help from "./pages/Help";
+import Admin from "./pages/Admin";
+import AdminInvite from "./pages/AdminInvite";
+import UniversityRequest from "./pages/UniversityRequest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +34,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (!user) {
     return <Navigate to="/" replace />;
   }
+
+  return <>{children}</>;
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, isAdmin } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
+          <span className="text-xl font-bold text-primary-foreground">C</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return <Navigate to="/" replace />;
+  if (!isAdmin) return <Navigate to="/home" replace />;
 
   return <>{children}</>;
 };
@@ -59,6 +81,9 @@ const AppRoutes = () => {
       <Route path="/carpooling" element={<ProtectedRoute><Carpooling /></ProtectedRoute>} />
       <Route path="/errands" element={<ProtectedRoute><Errands /></ProtectedRoute>} />
       <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      <Route path="/university-request" element={<ProtectedRoute><UniversityRequest /></ProtectedRoute>} />
+      <Route path="/admin-invite" element={<ProtectedRoute><AdminInvite /></ProtectedRoute>} />
+      <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
       
       {/* Redirects for old routes */}
       <Route path="/rides" element={<Navigate to="/carpooling?tab=find" replace />} />
