@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Car, ShoppingBag, Heart, ArrowRight } from "lucide-react";
+import { Car, Package, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -10,29 +10,29 @@ const features = [
     title: "Find a Carpool",
     description: "Share rides with fellow students",
     buttonText: "Find Rides",
-    pastelBg: "bg-[hsl(210,100%,92%)]",
-    iconBg: "bg-[hsl(210,100%,85%)]",
-    iconColor: "text-[hsl(210,80%,45%)]",
+    iconColor: "text-primary",
+    borderColor: "border-primary/20",
+    hoverBorder: "group-hover:border-primary/40",
   },
   {
     href: "/errands",
-    icon: ShoppingBag,
+    icon: Package,
     title: "Need an Errand?",
     description: "Get help with tasks and orders",
     buttonText: "Request Help",
-    pastelBg: "bg-[hsl(30,100%,92%)]",
-    iconBg: "bg-[hsl(30,100%,85%)]",
-    iconColor: "text-[hsl(24,100%,45%)]",
+    iconColor: "text-primary",
+    borderColor: "border-primary/20",
+    hoverBorder: "group-hover:border-primary/40",
   },
   {
     href: "/help",
-    icon: Heart,
+    icon: Shield,
     title: "Urgent Assistance",
     description: "Get emergency help live instantly",
     buttonText: "Get Help Now",
-    pastelBg: "bg-[hsl(0,80%,92%)]",
-    iconBg: "bg-[hsl(0,80%,85%)]",
-    iconColor: "text-[hsl(0,70%,50%)]",
+    iconColor: "text-primary",
+    borderColor: "border-primary/20",
+    hoverBorder: "group-hover:border-primary/40",
   },
 ];
 
@@ -48,38 +48,30 @@ const FeatureCards = () => {
               className="group block"
             >
               <Card 
-                className="h-full bg-card border-0 shadow-float card-float overflow-hidden rounded-3xl animate-fade-in-up"
+                className="h-full bg-card border border-border/50 shadow-float card-float overflow-hidden rounded-2xl animate-fade-in-up transition-all duration-300 hover:shadow-float-lg hover:border-primary/30"
                 style={{ animationDelay: `${index * 0.15}s` }}
               >
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  {/* Pastel Background with Icon */}
+                <CardContent className="p-8 flex flex-col items-center text-center">
+                  {/* Icon Container - Clean bordered style */}
                   <div 
-                    className={`w-full aspect-[4/3] rounded-2xl ${feature.pastelBg} flex items-center justify-center mb-5 overflow-hidden relative`}
+                    className={`w-20 h-20 rounded-2xl bg-card border-2 ${feature.borderColor} ${feature.hoverBorder} flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-105`}
                   >
-                    {/* Decorative circles */}
-                    <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/40" />
-                    <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-white/30" />
-                    
-                    <div 
-                      className={`w-20 h-20 rounded-2xl ${feature.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}
-                    >
-                      <feature.icon className={`w-10 h-10 ${feature.iconColor}`} strokeWidth={1.5} />
-                    </div>
+                    <feature.icon className={`w-10 h-10 ${feature.iconColor}`} strokeWidth={1.5} />
                   </div>
 
-                  {/* Title - Big Typography */}
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                  {/* Title */}
+                  <h3 className="text-xl font-bold mb-2 text-foreground tracking-tight">
                     {feature.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-muted-foreground text-sm mb-5">
+                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
                     {feature.description}
                   </p>
 
-                  {/* Rounded Button */}
+                  {/* Button */}
                   <Button 
-                    className="w-full rounded-xl h-11 font-semibold text-sm gradient-primary text-primary-foreground shadow-glow group-hover:shadow-glow-lg transition-all duration-300"
+                    className="w-full rounded-xl h-12 font-semibold text-sm gradient-primary text-primary-foreground shadow-glow group-hover:shadow-glow-lg transition-all duration-300"
                   >
                     {feature.buttonText}
                   </Button>
@@ -93,21 +85,21 @@ const FeatureCards = () => {
         <div className="flex justify-center gap-8 md:gap-16 mt-12 animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
           <div className="text-center">
             <div className="flex items-baseline gap-1 justify-center">
-              <span className="text-4xl md:text-5xl font-bold text-primary">12</span>
+              <span className="text-4xl md:text-5xl font-bold text-primary tracking-tight">12</span>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">Carpools<br/>Today</p>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">Carpools<br/>Today</p>
           </div>
           <div className="text-center">
             <div className="flex items-baseline gap-1 justify-center">
-              <span className="text-4xl md:text-5xl font-bold text-primary">8</span>
+              <span className="text-4xl md:text-5xl font-bold text-primary tracking-tight">8</span>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">Errands<br/>In Progress</p>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">Errands<br/>In Progress</p>
           </div>
           <div className="text-center">
             <div className="flex items-baseline gap-1 justify-center">
-              <span className="text-4xl md:text-5xl font-bold text-primary">2</span>
+              <span className="text-4xl md:text-5xl font-bold text-primary tracking-tight">2</span>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">Active<br/>Emergencies</p>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">Active<br/>Emergencies</p>
           </div>
         </div>
       </div>
