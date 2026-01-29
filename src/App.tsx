@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
+import logo from "@/assets/logo.png";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Carpooling from "./pages/Carpooling";
@@ -25,7 +26,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <span className="text-xl font-bold text-primary-foreground">C</span>
+          <img
+            src={logo}
+            alt="Campus ONE logo"
+            className="h-7 w-7 object-contain contrast-125"
+          />
         </div>
       </div>
     );
@@ -45,7 +50,11 @@ const AppRoutes = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse">
-          <span className="text-xl font-bold text-primary-foreground">C</span>
+          <img
+            src={logo}
+            alt="Campus ONE logo"
+            className="h-7 w-7 object-contain contrast-125"
+          />
         </div>
       </div>
     );
