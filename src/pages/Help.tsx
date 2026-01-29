@@ -4,6 +4,8 @@ import Layout from "@/components/layout/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FeatureHubHeader from "@/components/common/FeatureHubHeader";
 import ComingSoonPlaceholder from "@/components/common/ComingSoonPlaceholder";
+import HelpTicketForm from "@/components/help/HelpTicketForm";
+import MyHelpTickets from "@/components/help/MyHelpTickets";
 
 const Help = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,13 +43,7 @@ const Help = () => {
           </TabsList>
 
           <TabsContent value="report">
-            <div>
-              <ComingSoonPlaceholder
-                title="Report Emergency"
-                description="Need urgent help? Report an emergency and get assistance from your campus community."
-                icon={AlertTriangle}
-              />
-            </div>
+            <HelpTicketForm />
           </TabsContent>
 
           <TabsContent value="active">
@@ -61,13 +57,7 @@ const Help = () => {
           </TabsContent>
 
           <TabsContent value="my-requests">
-            <div>
-              <ComingSoonPlaceholder
-                title="My Help Requests"
-                description="Track your submitted help tickets and their current status."
-                icon={ClipboardList}
-              />
-            </div>
+            <MyHelpTickets />
           </TabsContent>
         </Tabs>
       </div>
