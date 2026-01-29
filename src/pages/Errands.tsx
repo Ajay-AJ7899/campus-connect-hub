@@ -3,10 +3,10 @@ import { ShoppingBag, Plus, Users, ClipboardList } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FeatureHubHeader from "@/components/common/FeatureHubHeader";
-import ComingSoonPlaceholder from "@/components/common/ComingSoonPlaceholder";
 import ErrandsFeed from "@/components/errands/ErrandsFeed";
 import ErrandPostForm from "@/components/errands/ErrandPostForm";
 import { useAuth } from "@/contexts/AuthContext";
+import GroupOrdersPanel from "@/components/group-orders/GroupOrdersPanel";
 
 const Errands = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,13 +58,7 @@ const Errands = () => {
           </TabsContent>
 
           <TabsContent value="orders">
-            <div>
-              <ComingSoonPlaceholder
-                title="Group Orders"
-                description="Join group food orders to save on delivery fees. Or create your own order for others to join."
-                icon={Users}
-              />
-            </div>
+            <GroupOrdersPanel />
           </TabsContent>
 
           <TabsContent value="my-requests">
