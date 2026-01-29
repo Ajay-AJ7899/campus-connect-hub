@@ -212,6 +212,89 @@ export type Database = {
           },
         ]
       }
+      errand_photos: {
+        Row: {
+          created_at: string
+          errand_id: string
+          id: string
+          path: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          errand_id: string
+          id?: string
+          path: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          errand_id?: string
+          id?: string
+          path?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_photos_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      errands: {
+        Row: {
+          campus_id: string | null
+          created_at: string
+          description: string
+          expires_at: string
+          id: string
+          requester_profile_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id?: string | null
+          created_at?: string
+          description: string
+          expires_at?: string
+          id?: string
+          requester_profile_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string | null
+          created_at?: string
+          description?: string
+          expires_at?: string
+          id?: string
+          requester_profile_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errands_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errands_requester_profile_id_fkey"
+            columns: ["requester_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       help_ticket_locations: {
         Row: {
           captured_at: string
