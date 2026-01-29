@@ -1,155 +1,210 @@
 
-## Summary of what you asked
-1) When someone sends a request (carpool join request or errand request), it should create a notification and update the bell icon + messages list.
-2) Add a “price/money” field to Carpooling posts and Errands posts, and display it in the cards.
-3) Allow viewing other people’s profiles (driver, requester, etc.) from cards/notifications.
+## Goals (what you asked)
+1) Show all money amounts in Indian Rupees (₹) instead of USD ($).
+2) Create an Admin section where an admin can:
+   - See campus-scoped summaries for Help, Carpooling, Errands (and “chats/requests”).
+   - Download each section as Excel-ready CSV files.
+   - Filter each section by date range.
+3) Include “chats” exports for:
+   - Carpool request messages
+   - Errand request messages
+   - Help ticket chat (this does not exist yet, so we will add it)
 
-## What I found in your codebase (current state)
-- `src/components/layout/Navbar.tsx` already shows a Bell icon, but it’s hardcoded to `0` and doesn’t open any list.
-- You already have a `notifications` table with RLS that allows users to **read/update their own** notifications.
-- Requests are created here:
-  - Carpool: `src/components/carpooling/FindRides.tsx` inserts into `carpool_requests` (now includes a one-line message dialog).
-  - Errands: `src/components/errands/ErrandsFeed.tsx` inserts into `contact_requests`.
-- There is no “notifications inbox UI” yet.
-- Carpooling + Errands currently have no “price” field in the DB tables shown; forms don’t collect it.
-- You have `/profile` for your own profile, but no route/page to view *other* users’ profiles.
+You confirmed:
+- Currency: INR (₹) everywhere
+- Export format: CSV (Excel-ready)
+- Admin scope: campus-scoped admin (Super Admin can access all campuses)
 
-## Implementation approach (what I will build)
+---
 
-### A) Notifications: create + show in UI
-#### A1) Backend: automatically create notifications when a request is made
-Because normal users can’t insert notifications “for other people” (RLS blocks it), this must be done server-side using database trigger functions.
+## Current state (what exists already)
+- Prices are stored as `price_cents` integer in:
+  - `travel_posts.price_cents`
+  - `errands.price_cents`
+- The UI formats money via `src/lib/money.ts` (`formatMoneyFromCents`, default currency currently “USD”) and parses user input via `parseMoneyToCents`.
+- Notifications UI exists (bell dropdown), and database already creates notifications for request inserts.
+- Roles are correctly stored in a separate `user_roles` table, with server-side `has_role()` and campus admin mapping via `admin_campuses`.
+- There is no admin page/route yet.
+- There is no help ticket “chat/messages” table yet.
 
-I will add database triggers:
+---
 
-1) On `carpool_requests` INSERT:
-- Find the driver/owner profile id from `travel_posts.driver_id` using `NEW.travel_post_id`.
-- Insert a notification row for that driver:
-  - `user_id = driver_profile_id`
-  - `type = 'carpool_request'` (or similar)
-  - `title = 'New ride request'`
-  - `message = one-line request message`
-  - optionally store `related_post_id = NEW.travel_post_id` if your schema supports it (your `notifications` table has `related_post_id` already)
+## Implementation plan
 
-2) On `contact_requests` INSERT (for errands only):
-- Use `NEW.owner_profile_id` as the notification receiver.
-- Insert notification row:
-  - `user_id = NEW.owner_profile_id`
-  - `type = 'errand_request'`
-  - `title = 'New errand request'`
-  - `message = NEW.message`
+### 1) Switch currency display to INR (₹) everywhere
+**Frontend changes**
+1. Update `src/lib/money.ts`
+   - Change default currency from `"USD"` to `"INR"` in `formatMoneyFromCents`.
+   - Set locale to `"en-IN"` for Indian grouping (e.g., 1,00,000).
+   - Keep cents logic (it maps cleanly to paise: 100 paise = ₹1).
 
-Important guardrails:
-- Do not notify if requester == owner (safety)
-- Keep these functions `SECURITY DEFINER` and set `search_path` properly (matches existing patterns in your DB functions)
+2. Update placeholders and labels that show `$`:
+   - `src/components/carpooling/OfferRide.tsx` placeholder `"$5"` → `"₹50"` (example)
+   - `src/components/errands/ErrandPostForm.tsx` placeholder `"$10"` → `"₹100"` (example)
+   - Any other visible currency strings found via search.
 
-#### A2) Frontend: bell icon badge + notifications dropdown/panel
-I will replace the hardcoded “0” badge in `Navbar.tsx` with a real unread count + a dropdown list.
+3. Keep storage unchanged (still integer “cents”), only display changes to ₹.
 
-Planned UI behavior:
-- Bell badge shows the number of unread notifications (`is_read = false`).
-- Clicking the bell opens a dropdown/panel that lists notifications (most recent first).
-- Each notification row will show:
-  - title
-  - message snippet
-  - relative time (e.g., “3m ago”)
-  - “Mark read” on click (or automatically mark read when opened)
-- When you click a notification:
-  - Carpool request notification → goes to `/carpooling?tab=trips` (driver can approve/decline there)
-  - Errand request notification → goes to `/errands?tab=my-requests` (if you have a proper requests inbox later); for now we can route to errands browse or create a minimal “My Requests (owner)” view depending on what exists.
+**Edge cases**
+- If a price is `0`, keep showing “Free” (or optionally “₹0”). I’ll keep “Free” because it reads better in cards.
 
-Real-time updates:
-- Use a `supabase.channel(...).on('postgres_changes'...)` subscription for the `notifications` table filtered to the current user, so the bell updates instantly.
-- Also keep a fallback `react-query` refetch/polling in case realtime misses something.
+---
 
-Files likely involved:
-- `src/components/layout/Navbar.tsx` (replace static badge + add dropdown)
-- New component: `src/components/notifications/NotificationsMenu.tsx` (or similar)
-- Potentially a small hook: `src/hooks/useNotifications.ts`
+### 2) Create Admin section (campus-scoped) with summary + CSV downloads
 
-### B) Add “price/money” fields to Carpooling + Errands
-You want the money shown so people can decide (“opt in”).
+#### 2A) Backend: add secure “admin reporting” RPC functions
+Because admin data must be campus-filtered and secure, we’ll implement reporting via database functions that:
+- Validate the current user (using `auth.uid()` internally).
+- Enforce admin access using existing `has_role()` / `is_admin_for_campus()` logic.
+- Return rows already filtered to the campus the admin is allowed to see.
 
-#### B1) Database schema changes
-I will add optional price columns using integer cents (safer than float):
+**New functions to add (migration)**
+1) `public.admin_accessible_campuses()`
+- Returns campuses the current user can manage:
+  - If `super_admin`: all campuses
+  - If `admin`: the single campus in `admin_campuses`
+- This avoids client-side role logic and allows a clean campus selector in the Admin UI.
 
-1) `travel_posts.price_cents integer null`
-2) `errands.price_cents integer null`
+2) `public.admin_dashboard_summary(_campus_id uuid, _from timestamptz, _to timestamptz)`
+- Returns counts like:
+  - Help tickets: total/open/acknowledged/resolved in range
+  - Travel posts created in range + active now
+  - Errands created in range + active now
+  - Carpool requests created in range
+  - Errand requests (contact_requests) created in range
+- Validates the caller is admin for `_campus_id` (or super admin).
 
-Validation:
-- Add a trigger or a simple constraint to ensure `price_cents >= 0` (if we use a check constraint it must be immutable; since it’s not time-based it’s fine).
+3) Export functions returning detailed rows for CSV download:
+- `public.admin_export_help_tickets(_campus_id uuid, _from timestamptz, _to timestamptz)`
+  - Include fields: ticket id, created_at, category, urgency, status, requester_user_id, requester name/email (join to profiles via `profiles.user_id = help_tickets.requester_user_id`), resolved_at, acknowledged_by
+- `public.admin_export_travel_posts(_campus_id uuid, _from timestamptz, _to timestamptz)`
+  - Include: id, created_at, from/to, date/time, seats, price_cents, status, driver profile fields (join profiles)
+- `public.admin_export_errands(_campus_id uuid, _from timestamptz, _to timestamptz)`
+  - Include: id, created_at, title, status, expires_at, price_cents, requester profile fields (join profiles)
+- `public.admin_export_carpool_requests(_campus_id uuid, _from timestamptz, _to timestamptz)`
+  - Include: request id, created_at, status, message, travel_post_id, driver profile, passenger profile
+- `public.admin_export_errand_requests(_campus_id uuid, _from timestamptz, _to timestamptz)`
+  - Export from `contact_requests` where `entity_type='errand'` with: id, created_at, status, message, entity_id, owner profile, requester profile
 
-#### B2) Update creation forms
-1) Carpooling “Offer Ride” (`src/components/carpooling/OfferRide.tsx`)
-- Add a “Price (optional)” input (example: “$5”).
-- Convert dollars → cents before insert.
-- Show “Free” or “—” if not set.
+All these functions should be `SECURITY DEFINER`, set `search_path` to public, and internally ensure:
+- `auth.uid()` is not null
+- The user is authorized for `_campus_id` using `is_admin_for_campus(auth.uid(), _campus_id)` or `has_role(auth.uid(), 'super_admin')`
 
-2) Errands “Post an Errand” (`src/components/errands/ErrandPostForm.tsx`)
-- Add “Price / reward (optional)” input.
-- Store as `price_cents`.
-- Keep it optional (some errands might be unpaid).
+This keeps admin access server-validated (no localStorage checks, no client trust).
 
-#### B3) Display price in browse cards
-1) Carpooling “Find Rides” (`src/components/carpooling/FindRides.tsx`)
-- Fetch `price_cents` and display a badge (e.g., `$5` or `Free`) in the ride details row.
+---
 
-2) Errands feed (`src/components/errands/ErrandsFeed.tsx`)
-- Display `Price` on the card near title or under it.
+#### 2B) Frontend: Admin route + Admin UI
+**Routing**
+- Add a new protected route: `/admin`
+- Add an `AdminRoute` wrapper that:
+  - Requires login
+  - Checks admin privileges server-side (via RPC), not via client flags
 
-Also update TypeScript types:
-- `src/components/errands/errands.types.ts` add `price_cents?: number | null` (and potentially `price_label` computed in UI).
+**Admin UI page**
+Create `src/pages/Admin.tsx` (name can be adjusted) with:
+- Campus selector:
+  - If Super Admin: dropdown of accessible campuses from `admin_accessible_campuses()`
+  - If Admin: fixed campus (read-only label)
+- Date range filter (From / To)
+  - Default: last 7 days
+- Tabs or sections:
+  1) Summary
+  2) Help
+  3) Carpooling
+  4) Errands
+  5) Chats / Requests
 
-### C) View other users’ profiles (driver/requester/host)
-You want to view:
-- driver profile from carpool cards
-- requested people profiles (passengers) in “My Trips”
-- errand owner profile from errand cards
-- notification sender/receiver context (where possible)
+Each section:
+- Shows a small table preview (e.g., latest 20 rows)
+- Includes a “Download CSV” button that exports the full filtered dataset.
 
-#### C1) Add a public (authenticated) profile view route
-Create a new page:
-- `src/pages/UserProfile.tsx` (name can vary)
-Route:
-- `/users/:profileId` (or `/profile/:id` but avoid confusion with your own `/profile`)
+**CSV download approach (no extra dependencies)**
+- Fetch rows from the corresponding RPC export function.
+- Convert JSON rows to CSV (escape commas/quotes/newlines properly).
+- Trigger a browser download with a filename like:
+  - `help_<campus>_2026-01-01_to_2026-01-29.csv`
+  - `carpool_requests_<campus>_<range>.csv`
 
-Page behavior:
-- Fetch profile by `id` from `profiles` table.
-- Show:
-  - name, avatar, verification, trips completed, bio, campus name (if you want to show it; it’s not sensitive in your current RLS since all authenticated can read profiles)
-- If profile not found → show friendly “User not found”.
+This opens cleanly in Excel.
 
-#### C2) Link to the profile view from UI
-- Carpooling:
-  - In `FindRides.tsx`, make the driver row clickable (“View profile” button or clicking avatar/name).
-  - In `MyTripsTab.tsx`, make passenger chips clickable and driver block clickable.
-- Errands:
-  - In `ErrandsFeed.tsx`, add “View profile” link/button for the owner (or make the owner name clickable if displayed; currently you don’t display owner info, so we may add it via a join to profiles).
+**Navbar**
+- Add an “Admin” menu item only if user is admin (determined via RPC), e.g. in profile dropdown.
 
-To support errands owner display, we may update the errands query to join `profiles`:
-- `errands.select("*, requester:profiles!errands_requester_profile_id_fkey(...)")`
-(We will confirm the FK name in generated schema/types and use the correct one.)
+---
 
-## Database work required (will require another “Modify database” approval)
-One migration that includes:
-- Add `price_cents` columns to `travel_posts` and `errands`
-- Create trigger functions + triggers for notifications on:
-  - `carpool_requests` insert
-  - `contact_requests` insert
+### 3) Add “Help ticket chat” feature + export (because you asked for chats)
+Right now, help tickets do not have a messages table. To support “help ticket chat” and downloads, we will implement:
+
+#### 3A) Database: new table for ticket messages
+Create table `help_ticket_messages`:
+- `id uuid primary key default gen_random_uuid()`
+- `ticket_id uuid not null references help_tickets(id) on delete cascade`
+- `sender_user_id uuid not null` (store auth user id, not profile id, since tickets already use `requester_user_id`)
+- `message text not null`
+- `created_at timestamptz not null default now()`
+
+**RLS policies**
+- SELECT allowed if `can_access_ticket(auth.uid(), ticket_id)` is true (you already have this function).
+- INSERT allowed if:
+  - requester of the ticket OR admin for that ticket’s campus:
+  - `can_access_ticket(auth.uid(), ticket_id)` AND `sender_user_id = auth.uid()`
+- No UPDATE/DELETE for normal users (keeps history stable). Super admin could have broader privileges if desired.
+
+#### 3B) UI: minimal “Help ticket chat” interface (admin + requester)
+Because you want admin section + exports, we need at least minimal UI to create messages; otherwise there would be nothing to export.
+
+We’ll implement:
+- In Help area (likely in “My Requests” first, and in Admin Help view):
+  - A “View details” panel for a ticket
+  - Messages list
+  - One-line / multi-line message input
+  - Send button (inserts into `help_ticket_messages`)
+
+Optional (recommended):
+- Trigger notification on new help_ticket_messages insert to notify the other party (admin or requester). This can be a follow-up if you want.
+
+#### 3C) Admin export for help chat
+Add RPC:
+- `admin_export_help_ticket_messages(_campus_id uuid, _from timestamptz, _to timestamptz)`
+  - Join to help_tickets to filter by campus
+  - Include sender info by joining `profiles` on `profiles.user_id = sender_user_id`
+
+---
+
+## Database migration(s) required
+We’ll need at least one “Modify database” migration for:
+1) Create `help_ticket_messages` table + RLS policies
+2) Create admin reporting functions:
+   - `admin_accessible_campuses`
+   - `admin_dashboard_summary`
+   - `admin_export_*` functions for each section (including help chat export)
+
+No existing tables need destructive changes.
+
+---
 
 ## Testing checklist (end-to-end)
-1) Create a carpool ride with a price → verify it shows in Find Rides cards.
-2) Post an errand with a price/reward → verify it shows in Browse.
-3) From a second user, request to join a ride with a one-line message → verify:
-   - driver immediately sees notification badge increase
-   - notification appears in bell dropdown with message preview
-   - clicking notification takes driver to My Trips (and request is visible)
-4) From a second user, request an errand → verify:
-   - errand owner gets notification
-5) Click a driver/passenger/owner “View profile” link → verify profile page opens and shows correct info.
+1) Prices:
+- Post a ride with price `₹50` → confirm it displays as `₹50` (not `$`).
+- Post an errand with price → confirm it displays in ₹ with Indian formatting.
+2) Admin access:
+- Login as normal user → cannot access `/admin` (redirect/blocked).
+- Login as admin → can access `/admin` and sees only their campus.
+- Login as super admin → can select different campuses.
+3) CSV exports:
+- Download Help CSV for a date range → opens correctly in Excel.
+- Download Carpool Requests + Errand Requests CSV → includes message (“chat”) column and correct campus filtering.
+4) Help chat:
+- Create a help ticket → add a chat message as requester.
+- Admin views the ticket and replies.
+- Export help chat CSV and verify messages are included and filtered by campus/date.
 
-## Notes / small decisions I’ll implement by default
-- Currency display: USD with `$` formatting.
-- Price is optional; if empty, display “Free” (carpool) / “No price” or hide (errands) depending on UI readability.
-- Notifications will be “unread” until you open/click them; opening the dropdown can mark all as read or we can mark individually (I’ll implement individual mark-read on click to be safer).
+---
+
+## Notes / decisions I will follow (to match your requirements)
+- Currency: INR (₹) everywhere; storage remains integer paise-based.
+- Admin scope is campus-limited for admins; super admin can access all campuses.
+- Exports are CSV (Excel-ready), no extra dependencies.
+- “Chats” includes: carpool request messages, errand request messages, and help ticket chat (implemented via a new messages table).
 
