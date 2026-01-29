@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 
@@ -6,6 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import RequestMessageDialog from "@/components/common/RequestMessageDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 import type { ErrandPhotoRow, ErrandRow } from "./errands.types";
 
@@ -67,6 +71,11 @@ async function signUrl(path: string) {
 }
 
 export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedProps) {
+  const { profile } = useAuth();
+  const { toast } = useToast();
+  const [requestErrandId, setRequestErrandId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["errands", mode, requesterProfileId],
     queryFn: () => fetchErrands(mode, requesterProfileId),
@@ -124,8 +133,74 @@ export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedPro
 
   const now = new Date();
 
+  const submitRequest = async (message: string) => {
+    if (!profile || !requestErrandId) return;
+
+    const errand = errands.find((e) => e.id === requestErrandId);
+    if (!errand) return;
+
+    if (errand.requester_profile_id === profile.id) {
+      toast({
+        variant: "destructive",
+        title: "Not allowed",
+        description: "You can’t request your own errand.",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error: insertError } = await supabase.from("contact_requests").insert({
+        entity_type: "errand",
+        entity_id: errand.id,
+        owner_profile_id: errand.requester_profile_id,
+        requester_profile_id: profile.id,
+        message,
+      });
+
+      if (insertError) {
+        if (insertError.code === "23505") {
+          toast({
+            title: "Already requested",
+            description: "You already sent a request for this errand.",
+          });
+          setRequestErrandId(null);
+          return;
+        }
+        throw insertError;
+      }
+
+      toast({
+        title: "Request sent",
+        description: "Your message was sent to the errand owner.",
+      });
+      setRequestErrandId(null);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Couldn’t send request",
+        description: "Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <>
+      <RequestMessageDialog
+        open={requestErrandId !== null}
+        onOpenChange={(open) => {
+          if (!open) setRequestErrandId(null);
+        }}
+        title="Request to help"
+        description="Send a quick one-line message to the person who posted this errand."
+        submitLabel="Send request"
+        loading={submitting}
+        onSubmit={submitRequest}
+      />
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {errands.map((e) => {
         const isExpired = new Date(e.expires_at) <= now || e.status !== "active";
         const createdLabel = formatDistanceToNowStrict(new Date(e.created_at), { addSuffix: true });
@@ -165,14 +240,25 @@ export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedPro
               <p className="text-sm text-muted-foreground mt-3 line-clamp-4">{e.description}</p>
 
               {mode === "feed" && (
-                <p className="text-xs text-muted-foreground mt-4">
-                  Expires in {formatDistanceToNowStrict(new Date(e.expires_at))}
-                </p>
+                <div className="mt-4 space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Expires in {formatDistanceToNowStrict(new Date(e.expires_at))}
+                  </p>
+
+                  <Button
+                    className="w-full"
+                    disabled={!profile || profile.id === e.requester_profile_id}
+                    onClick={() => setRequestErrandId(e.id)}
+                  >
+                    Request
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
         );
       })}
-    </div>
+      </div>
+    </>
   );
 }
