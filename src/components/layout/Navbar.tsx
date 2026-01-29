@@ -146,14 +146,6 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             {user ? (
               <>
-                {/* Create Ride Button */}
-                <Link to="/carpooling?tab=offer" className="hidden sm:block">
-                  <Button className="gradient-primary text-primary-foreground">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Offer Ride
-                  </Button>
-                </Link>
-
                 {/* Notifications */}
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="w-5 h-5" />
@@ -262,16 +254,6 @@ const Navbar = () => {
                 </Collapsible>
               ))}
               
-              {user && (
-                <Link
-                  to="/carpooling?tab=offer"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium gradient-primary text-primary-foreground mt-2"
-                >
-                  <Plus className="w-5 h-5" />
-                  Offer Ride
-                </Link>
-              )}
             </div>
           </div>
         )}
