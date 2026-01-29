@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Bell, User, Car, ShoppingBag, Shield, LogOut, Plus, ChevronDown, MapPin, Users, AlertTriangle, ClipboardList, Moon, Sun } from "lucide-react";
+import { Menu, X, Bell, User, Car, ShoppingBag, Shield, LogOut, Plus, ChevronDown, MapPin, Users, AlertTriangle, ClipboardList, Moon, Sun, LayoutDashboard, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +67,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
 
   const isActive = (path: string) => location.pathname.startsWith(path.split("?")[0]);
 
@@ -191,6 +191,22 @@ const Navbar = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin-invite" className="cursor-pointer">
+                        <Ticket className="w-4 h-4 mr-2" />
+                        Redeem Admin Invite
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          Admin Portal
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/carpooling?tab=trips" className="cursor-pointer">
                         <Car className="w-4 h-4 mr-2" />

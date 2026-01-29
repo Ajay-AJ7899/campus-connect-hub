@@ -18,6 +18,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  roles: string[];
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
   loading: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -43,6 +46,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -59,6 +63,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return data as Profile;
   };
 
+  const fetchRoles = async (userId: string) => {
+    // Types for these tables are generated from the backend; this query is safe even if
+    // the local types file hasn't been refreshed yet.
+    const { data, error } = await (supabase as any)
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error fetching roles:", error);
+      return [] as string[];
+    }
+
+    return (data ?? []).map((r: any) => String(r.role));
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -70,9 +90,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id).then(setProfile);
+            fetchRoles(session.user.id).then(setRoles);
           }, 0);
         } else {
           setProfile(null);
+          setRoles([]);
         }
       }
     );
@@ -83,10 +105,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id).then((profile) => {
-          setProfile(profile);
-          setLoading(false);
-        });
+        Promise.all([fetchProfile(session.user.id), fetchRoles(session.user.id)]).then(
+          ([profile, roles]) => {
+            setProfile(profile);
+            setRoles(roles);
+            setLoading(false);
+          },
+        );
       } else {
         setLoading(false);
       }
@@ -126,6 +151,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setRoles([]);
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -151,6 +177,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         user,
         session,
         profile,
+        roles,
+        isAdmin: roles.includes("admin") || roles.includes("super_admin"),
+        isSuperAdmin: roles.includes("super_admin"),
         loading,
         signUp,
         signIn,
