@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useMemo, useState } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Plus, Users } from "lucide-react";
@@ -62,7 +63,7 @@ async function fetchGroupOrders(campusId: string, myProfileId: string) {
   });
 }
 
-export default function GroupOrdersPanel() {
+const GroupOrdersPanel = React.forwardRef<HTMLDivElement>((_, ref) => {
   const { profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -170,14 +171,14 @@ export default function GroupOrdersPanel() {
 
   if (!canUse) {
     return (
-      <div className="text-sm text-muted-foreground">
+      <div ref={ref} className="text-sm text-muted-foreground">
         To use Group Orders, please make sure you’re signed in and have selected a campus.
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div ref={ref} className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-lg font-semibold">Group Orders</h2>
@@ -256,7 +257,11 @@ export default function GroupOrdersPanel() {
       </div>
     </div>
   );
-}
+});
+
+GroupOrdersPanel.displayName = "GroupOrdersPanel";
+
+export default GroupOrdersPanel;
 
 function GroupOrderCard({
   order,
