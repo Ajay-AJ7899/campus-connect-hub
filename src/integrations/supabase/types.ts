@@ -295,6 +295,99 @@ export type Database = {
           },
         ]
       }
+      group_order_participants: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          order_id: string
+          participant_profile_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id: string
+          participant_profile_id: string
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string
+          participant_profile_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_order_participants_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "group_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_order_participants_participant_profile_id_fkey"
+            columns: ["participant_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_orders: {
+        Row: {
+          campus_id: string
+          created_at: string
+          creator_profile_id: string
+          deadline_at: string | null
+          description: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          creator_profile_id: string
+          deadline_at?: string | null
+          description: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          creator_profile_id?: string
+          deadline_at?: string | null
+          description?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_orders_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_orders_creator_profile_id_fkey"
+            columns: ["creator_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       help_ticket_locations: {
         Row: {
           captured_at: string
