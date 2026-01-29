@@ -737,6 +737,15 @@ export type Database = {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
+      create_campus: {
+        Args: {
+          _city: string
+          _country?: string
+          _name: string
+          _state?: string
+        }
+        Returns: string
+      }
       current_user_campus_id: { Args: never; Returns: string }
       has_role: {
         Args: {
