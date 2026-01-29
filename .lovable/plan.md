@@ -1,161 +1,139 @@
 
-## Goals from your request
-1) Make the app feel **unified across Carpooling + Errands + Help** (balanced, not overly carpool-centric).
-2) Build **Errands basic working MVP** including **photo upload (max 2 photos)**.
-3) **Auto-remove (soft-expire / hide)**:
-   - Errands: hide **2 days after posting**
-   - Carpool posts: hide **end of the departure day**
-4) Make the website **lighter / faster** (less heavy on initial load).
+## What’s going wrong (based on the actual network errors)
+### 1) Group Orders + Help: “new row violates row level security”
+Your backend rules for **Group Orders** and **Help Tickets** require that:
+- the row’s `campus_id` must match **the campus stored on your profile in the database** (via `current_user_campus_id()`).
+
+But your requests are sending `campus_id = d00eee... (City College)` while your profile campus in the database was changed to something else earlier (example in logs: `5a9218...`).
+
+So the backend correctly rejects the insert with **403 + RLS violation**.
+
+This is why:
+- `POST /group_orders` fails with RLS
+- `POST /help_tickets` fails with RLS
+
+### 2) Profile page 404
+Navbar links to `/profile`, but `src/App.tsx` has **no route** for `/profile` and `src/pages` has **no Profile.tsx** page. So it will always 404.
+
+### 3) “Request button + one line message”
+You asked to add this for:
+- Carpooling rides (request-to-join + message)
+- Errands (request help + one-line message)
+And you want **Group Orders to remain instant-join** (no approval required).
+
+Also you chose: **Campus switching = Lock campus** (after signup).
 
 ---
 
-## A) Unify the UI across all feature hubs (Carpooling / Errands / Help)
-### What will change
-- Create a small shared header component used by all feature pages so they feel like one system:
-  - Same layout (icon badge, title, subtitle)
-  - Same spacing + typography
-  - Feature-specific color gradients stay, but structure is consistent
-
-### Implementation steps
-1) Create a reusable header component (example: `FeatureHubHeader`)
-   - Props: `icon`, `title`, `subtitle`, `gradientClass`
-2) Replace the “Header” sections in:
-   - `src/pages/Carpooling.tsx`
-   - `src/pages/Errands.tsx`
-   - `src/pages/Help.tsx`
-   with the new unified header.
-3) Ensure the tabs look consistent:
-   - Keep the same Tabs styling and spacing (`TabsList` sizing, consistent icons, etc.)
-
-### Result
-Every hub page will feel like part of the same product, with consistent structure and navigation.
+## Goals
+1) Fix Group Orders + Help inserts so they stop failing due to campus mismatch.
+2) Add the missing `/profile` page (no more 404).
+3) Add “Request” button + one-line message for:
+   - Carpooling rides (store it on `carpool_requests.message`)
+   - Errands (store it using the existing `contact_requests` table)
+4) Enforce “campus lock” after signup (only set campus if it’s currently empty).
 
 ---
 
-## B) Build Errands MVP (with photo upload, max 2 photos)
-### MVP scope (basic working)
-- Browse errands (feed)
-- Post an errand (title, description, optional photos up to 2)
-- My errands (posted by me)
-- (No “group orders” yet; keep as Coming Soon for now unless you want it implemented)
+## Implementation plan
 
-### Backend changes (database + file storage)
-We will add:
-1) **File storage bucket** (for images)
-   - Example bucket: `errand-photos`
-   - Images will be stored in file storage; the database stores only file paths/URLs (never store image binaries).
+### A) Fix the campus mismatch that causes RLS failures (most important)
+We’ll do this in two layers (so it’s robust):
 
-2) **Database tables**
-- `errands`
-  - `id` uuid
-  - `created_at`
-  - `updated_at`
-  - `requester_profile_id` (references `profiles.id`)
-  - `campus_id` (references `campuses.id` or nullable, but recommended required if campus routing matters)
-  - `title`
-  - `description`
-  - `status` (e.g., `active`, `expired`)
-  - `expires_at` = `created_at + 2 days` (set at insert time)
-- `errand_photos`
-  - `id` uuid
-  - `errand_id` uuid references `errands.id` on delete cascade
-  - `path` (file path in storage)
-  - `sort_order` smallint (0/1)
-  - Enforce max 2 photos per errand at the app level; optionally also via DB trigger if needed.
+#### A1) Frontend: stop overwriting campus after signup (campus lock)
+Update `src/pages/Auth.tsx`:
+- On **signup**: campus is required → set it on the user profile (same as now).
+- On **login**: campus picker is optional for “suggestions only”
+  - If the profile already has a campus → **do not update the database campus**
+  - If the profile campus is empty → set it (to fix old accounts with missing campus)
+- Also, when we do update the profile campus (signup or empty campus), we will update the in-app `profile` state immediately so the rest of the app uses the correct campus right away.
 
-3) **RLS policies**
-- Errands:
-  - Anyone authenticated can read active errands (or everyone if you want public browsing; recommended: authenticated only)
-  - Users can insert their own errands only
-  - Users can update/delete their own errands only
-- Errand photos:
-  - Users can insert photos only for errands they own
-  - Users can read photos for errands they can read
+#### A2) Backend safety: add triggers to force correct `campus_id` on insert (prevents stale UI from breaking inserts)
+Add a database migration to:
+- Create a small trigger function that sets `NEW.campus_id = current_user_campus_id()` on insert
+- Attach it as a **BEFORE INSERT** trigger on:
+  - `group_orders`
+  - `help_tickets`
 
-### Frontend changes
-1) Replace placeholders in `src/pages/Errands.tsx`:
-   - Browse tab: list active errands
-   - Post tab: real form
-   - My requests tab: list my errands (active + expired)
-2) Add components:
-   - `ErrandPostForm` (title, description, photo picker/upload)
-   - `ErrandsFeed` (cards showing title, description, campus, created time, photos)
-   - `MyErrandsList`
-3) Upload flow
-   - On submit:
-     1) Create errand row
-     2) Upload up to 2 images to storage (namespaced by errand id + user)
-     3) Insert rows into `errand_photos`
-   - Add strong validation:
-     - file type: image only
-     - max size (reasonable limit per image)
-     - max 2 images
+Result:
+- even if the UI accidentally sends the wrong campus id, the database will overwrite it to the user’s real campus and RLS will pass.
+
+This also makes your system more secure (client cannot “spoof” campuses).
 
 ---
 
-## C) Auto-remove (soft-expire / hide) for Errands + Carpooling
-You chose: **Soft-expire (hide)**.
+### B) Fix Profile 404 by adding a Profile page + route
+Create:
+- `src/pages/Profile.tsx` (new)
 
-### Errands expiry (after 2 days)
-We will implement expiry in two layers:
-1) UI + query filtering:
-   - Browsing feed shows only `status=active` and `expires_at > now()`
-2) Automatic status updates (optional but recommended):
-   - Lightweight scheduled backend job can mark expired items daily/hourly.
-   - If scheduling is not available immediately, the UI filtering still makes items “auto removed” to users.
+Update:
+- `src/App.tsx` to add a protected route: `/profile`
 
-### Carpool expiry (end of day)
-Current carpool data is in `travel_posts` with fields:
-- `departure_date`, `departure_time`, `status`
-
-We will:
-1) Update all “Find rides” queries to exclude expired:
-   - Hide posts where `departure_date < today` (end-of-day rule)
-   - Also keep `status='active'` filter
-2) Add a status transition to `travel_posts`:
-   - When day ends, mark `status='expired'` (optional job)
-   - Even without a job, the UI/filter rule ensures old rides disappear.
+Profile page behavior (simple, useful, safe):
+- Show name, email, verification, trips completed
+- Show campus name (read-only; since campus is locked)
+- Allow editing safe fields like `full_name` / `bio` (optional; if you want, we can start read-only first and add editing next)
 
 ---
 
-## D) Make the website lighter (performance improvements)
-### Biggest current “heavy” item
-- The homepage hero video (`/videos/hero-video.mp4`) auto-plays and can be expensive on mobile.
+### C) Add “Request + one-line message” UI
 
-### Changes we’ll make
-1) **Video performance**
-   - Use `preload="metadata"` instead of full preload
-   - Add a `poster` image (so it loads fast before video)
-   - Use `prefers-reduced-motion` to disable autoplay for users who prefer it
-   - On small screens, optionally fallback to a static image instead of video
+#### C1) Carpooling rides (Find Rides)
+Update `src/components/carpooling/FindRides.tsx`:
+- When user clicks “Request to Join”, open a dialog:
+  - one-line message input (ex: max 140 chars)
+  - submit inserts into `carpool_requests` with:
+    - `travel_post_id`
+    - `passenger_id = profile.id`
+    - `message = typed message`
+- Keep the existing “Already requested” handling.
+- Optional improvement: disable request button after request is sent (or show “Requested”).
 
-2) **Route-level code splitting**
-   - Lazy load big pages:
-     - Carpooling, Errands, Help, Admin portal, etc.
-   - Keep Auth + shell small
+#### C2) Errands feed
+Update `src/components/errands/ErrandsFeed.tsx` (feed mode only):
+- Add a “Request” button on each errand card (not shown on “mine” tab, and not shown for your own errands)
+- On click, open dialog with one-line message
+- Insert into `contact_requests`:
+  - `entity_type = "errand"`
+  - `entity_id = errand.id`
+  - `owner_profile_id = errand.requester_profile_id`
+  - `requester_profile_id = current profile.id`
+  - `message = typed message`
 
-3) **Reduce expensive visuals where needed**
-   - Audit heavy shadows/animations (`shadow-glow`, `shadow-float-lg`, many `animate-*`)
-   - Keep the “Gen Z / professional” feel but reduce always-on animation and large blur layers
-   - Ensure the navbar “glass” effect is not over-blurred on low-end devices
-
-### How we’ll verify “lighter”
-- Check initial load time and bundle chunking (smaller initial JS)
-- Confirm the home route feels faster on mobile
-
----
-
-## E) Sequencing (what I will implement first)
-1) Errands backend + storage (tables, bucket, RLS)
-2) Errands MVP UI (browse/post/my errands) + photo upload (2 max)
-3) Carpool + errands expiry filtering (soft-expire behavior)
-4) Performance pass (video optimization + lazy loading)
-5) Final UI unification polish across hub headers/tabs
+#### C3) Prevent spam duplicates (recommended)
+Add a database migration:
+- Add a UNIQUE constraint to `contact_requests` to prevent multiple pending requests from the same requester for the same thing:
+  - Unique on `(entity_type, entity_id, requester_profile_id)`
+Then in UI:
+- If insert fails with duplicate constraint, show toast “You already requested this”.
 
 ---
 
-## Notes / constraints (important)
-- Passwords will never be hardcoded or stored.
-- Photos will be stored in file storage; database will store only paths/URLs.
-- “Auto removal” will be implemented as **soft-expire/hide** as you requested.
+## Files we’ll likely change
+Frontend:
+- `src/pages/Auth.tsx` (campus lock + immediate profile sync)
+- `src/contexts/AuthContext.tsx` (optional: helper to refresh profile after updates, if needed)
+- `src/App.tsx` (add `/profile` route)
+- `src/pages/Profile.tsx` (new)
+- `src/components/carpooling/FindRides.tsx` (request dialog + message)
+- `src/components/errands/ErrandsFeed.tsx` (request dialog + message)
+- (Possibly) create a small reusable dialog component for “RequestMessageDialog” if we want to avoid duplication
+
+Backend (migrations):
+- Trigger(s) to force campus_id on insert for `group_orders`, `help_tickets`
+- Unique constraint on `contact_requests`
+
+---
+
+## Testing checklist (end-to-end)
+1) Sign in → go to Errands → Group Orders → create order → should succeed (no RLS error).
+2) Go to Help → Report → submit help ticket → should succeed (no RLS error).
+3) Navbar → Profile → should open (no 404).
+4) Carpooling → Find Rides → Request to Join → type message → submit → should create a request with message.
+5) Errands feed → Request on an errand → type message → submit → should create a contact request; clicking again should show “already requested”.
+
+---
+
+## Notes / constraints from your choices
+- “Campus switching = Lock campus”: after this change, campus can be set on signup (required) and only auto-set later if the profile campus is empty. Profile page will show campus read-only.
 
