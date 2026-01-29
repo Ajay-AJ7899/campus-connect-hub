@@ -67,7 +67,7 @@ const Index = () => {
             {profile?.full_name && (
               <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-float text-sm font-semibold mb-6 animate-fade-in">
                 <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
-                <span className="text-foreground">Welcome back, {profile.full_name.split(' ')[0]}! 👋</span>
+                <span className="text-black font-bold">Welcome back, {profile.full_name.split(' ')[0]}! 👋</span>
               </div>
             )}
 
