@@ -115,9 +115,15 @@ export default function CampusPicker({
   useEffect(() => {
     if (!value) return;
     if (loading) return;
-    const exists = campuses.some((c) => c.id === value);
-    if (!exists) onChange("");
-  }, [value, loading, campuses, onChange]);
+    // NOTE:
+    // After creating a campus via rpc("create_campus"), `useCampuses()` won't
+    // refetch immediately, so the new campus id won't be in `campuses` yet.
+    // We persist newly created campuses into `recent` first, so treat those as
+    // valid selections and don't clear them.
+    const existsInCampuses = campuses.some((c) => c.id === value);
+    const existsInRecent = recent.some((r) => r.id === value);
+    if (!existsInCampuses && !existsInRecent) onChange("");
+  }, [value, loading, campuses, recent, onChange]);
 
   const openAddDialogForSearch = () => {
     setAddError(null);
