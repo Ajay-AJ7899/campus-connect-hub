@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { HelpTicketChatDialog } from "@/components/help/HelpTicketChatDialog";
 
 import type { HelpTicketRow } from "./help.types";
 
@@ -98,6 +99,10 @@ export default function MyHelpTickets() {
               </div>
 
               <p className="text-sm text-muted-foreground mt-3 whitespace-pre-wrap">{t.description}</p>
+
+              <div className="mt-4 flex justify-end">
+                <HelpTicketChatDialog ticketId={t.id} triggerLabel="Open chat" />
+              </div>
             </CardContent>
           </Card>
         );

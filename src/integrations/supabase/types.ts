@@ -486,6 +486,38 @@ export type Database = {
           },
         ]
       }
+      help_ticket_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_user_id: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_user_id: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_user_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "help_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       help_tickets: {
         Row: {
           acknowledged_by: string | null
@@ -739,6 +771,115 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_accessible_campuses: {
+        Args: never
+        Returns: {
+          city: string
+          country: string
+          id: string
+          name: string
+          state: string
+        }[]
+      }
+      admin_dashboard_summary: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: Json
+      }
+      admin_export_carpool_requests: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: {
+          created_at: string
+          driver_email: string
+          driver_name: string
+          driver_profile_id: string
+          message: string
+          passenger_email: string
+          passenger_name: string
+          passenger_profile_id: string
+          request_id: string
+          status: string
+          travel_post_id: string
+        }[]
+      }
+      admin_export_errand_requests: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: {
+          created_at: string
+          errand_id: string
+          message: string
+          owner_email: string
+          owner_name: string
+          owner_profile_id: string
+          request_id: string
+          requester_email: string
+          requester_name: string
+          requester_profile_id: string
+          status: string
+        }[]
+      }
+      admin_export_errands: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: {
+          created_at: string
+          errand_id: string
+          expires_at: string
+          price_cents: number
+          requester_email: string
+          requester_name: string
+          requester_profile_id: string
+          status: string
+          title: string
+        }[]
+      }
+      admin_export_help_ticket_messages: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: {
+          created_at: string
+          message: string
+          message_id: string
+          sender_email: string
+          sender_name: string
+          sender_user_id: string
+          ticket_id: string
+        }[]
+      }
+      admin_export_help_tickets: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: {
+          acknowledged_by: string
+          category: string
+          created_at: string
+          requester_email: string
+          requester_name: string
+          requester_user_id: string
+          resolved_at: string
+          status: string
+          ticket_id: string
+          urgency: string
+        }[]
+      }
+      admin_export_travel_posts: {
+        Args: { _campus_id: string; _from: string; _to: string }
+        Returns: {
+          available_seats: number
+          created_at: string
+          departure_date: string
+          departure_time: string
+          driver_email: string
+          driver_name: string
+          driver_profile_id: string
+          from_location: string
+          price_cents: number
+          status: string
+          to_location: string
+          total_seats: number
+          travel_post_id: string
+        }[]
+      }
+      assert_admin_for_campus: {
+        Args: { _campus_id: string }
+        Returns: undefined
+      }
       can_access_ticket: {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
