@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationsMenu from "@/components/notifications/NotificationsMenu";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   {
@@ -96,7 +97,11 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/home" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow-sm">
-              <span className="text-xl font-bold text-primary-foreground">C</span>
+              <img
+                src={logo}
+                alt="Campus ONE logo"
+                className="h-6 w-6 object-contain contrast-125"
+              />
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:block">
               Campus ONE

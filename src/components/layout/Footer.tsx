@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { Heart, Github, Twitter, Instagram } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Footer = React.forwardRef<HTMLElement>((_, ref) => {
   return (
@@ -11,7 +12,11 @@ const Footer = React.forwardRef<HTMLElement>((_, ref) => {
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-                <span className="text-xl font-bold text-primary-foreground">C</span>
+                <img
+                  src={logo}
+                  alt="Campus ONE logo"
+                  className="h-6 w-6 object-contain contrast-125"
+                />
               </div>
               <span className="text-xl font-bold gradient-text">Campus ONE</span>
             </Link>
