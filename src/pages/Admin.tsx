@@ -280,12 +280,18 @@ export default function Admin() {
             </div>
 
             <Card>
-              <CardHeader><CardTitle className="text-base">Help tickets (preview)</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="text-base">Help Tickets (preview - showing latest 20)</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Total tickets in range: {helpQuery.data?.length ?? 0}
+                </p>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Created</TableHead>
+                      <TableHead>Requester</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Urgency</TableHead>
                       <TableHead>Status</TableHead>
@@ -296,9 +302,23 @@ export default function Admin() {
                     {(helpQuery.data ?? []).slice(0, 20).map((r) => (
                       <TableRow key={r.ticket_id}>
                         <TableCell className="whitespace-nowrap">{format(new Date(r.created_at), "PPp")}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm">{r.requester_name || "—"}</span>
+                            <span className="text-xs text-muted-foreground">{r.requester_email}</span>
+                          </div>
+                        </TableCell>
                         <TableCell className="capitalize">{String(r.category).replace(/_/g, " ")}</TableCell>
-                        <TableCell className="capitalize">{String(r.urgency).replace(/_/g, " ")}</TableCell>
-                        <TableCell className="capitalize">{String(r.status).replace(/_/g, " ")}</TableCell>
+                        <TableCell>
+                          <Badge variant={r.urgency === 'critical' ? 'destructive' : r.urgency === 'high' ? 'default' : 'secondary'}>
+                            {String(r.urgency).replace(/_/g, " ")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={r.status === 'resolved' ? 'outline' : r.status === 'open' ? 'destructive' : 'secondary'}>
+                            {String(r.status).replace(/_/g, " ")}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-right">
                           <HelpTicketChatDialog ticketId={r.ticket_id} triggerLabel="Open" />
                         </TableCell>
@@ -321,14 +341,23 @@ export default function Admin() {
               </Button>
             </div>
             <Card>
-              <CardHeader><CardTitle className="text-base">Travel posts (preview)</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="text-base">Travel Posts (preview - showing latest 20)</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Total posts in range: {travelQuery.data?.length ?? 0}
+                </p>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Created</TableHead>
+                      <TableHead>Driver</TableHead>
                       <TableHead>From</TableHead>
                       <TableHead>To</TableHead>
+                      <TableHead>Departure</TableHead>
+                      <TableHead>Seats</TableHead>
+                      <TableHead>Price</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -336,8 +365,25 @@ export default function Admin() {
                     {(travelQuery.data ?? []).slice(0, 20).map((r) => (
                       <TableRow key={r.travel_post_id}>
                         <TableCell className="whitespace-nowrap">{format(new Date(r.created_at), "PPp")}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm">{r.driver_name || "—"}</span>
+                            <span className="text-xs text-muted-foreground">{r.driver_email}</span>
+                          </div>
+                        </TableCell>
                         <TableCell className="max-w-[220px] truncate">{r.from_location}</TableCell>
                         <TableCell className="max-w-[220px] truncate">{r.to_location}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {format(new Date(r.departure_date), "PP")}
+                          <br />
+                          <span className="text-xs text-muted-foreground">{r.departure_time}</span>
+                        </TableCell>
+                        <TableCell>
+                          {r.available_seats}/{r.total_seats}
+                        </TableCell>
+                        <TableCell>
+                          {r.price_cents ? `₹${(r.price_cents / 100).toFixed(0)}` : 'Free'}
+                        </TableCell>
                         <TableCell className="capitalize">{String(r.status).replace(/_/g, " ")}</TableCell>
                       </TableRow>
                     ))}
@@ -369,13 +415,21 @@ export default function Admin() {
               </Button>
             </div>
             <Card>
-              <CardHeader><CardTitle className="text-base">Errands (preview)</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="text-base">Errands (preview - showing latest 20)</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Total errands in range: {errandsQuery.data?.length ?? 0}
+                </p>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Created</TableHead>
+                      <TableHead>Requester</TableHead>
                       <TableHead>Title</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Expires</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -383,7 +437,19 @@ export default function Admin() {
                     {(errandsQuery.data ?? []).slice(0, 20).map((r) => (
                       <TableRow key={r.errand_id}>
                         <TableCell className="whitespace-nowrap">{format(new Date(r.created_at), "PPp")}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm">{r.requester_name || "—"}</span>
+                            <span className="text-xs text-muted-foreground">{r.requester_email}</span>
+                          </div>
+                        </TableCell>
                         <TableCell className="max-w-[360px] truncate">{r.title}</TableCell>
+                        <TableCell>
+                          {r.price_cents ? `₹${(r.price_cents / 100).toFixed(0)}` : 'Free'}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                          {format(new Date(r.expires_at), "PPp")}
+                        </TableCell>
                         <TableCell className="capitalize">{String(r.status).replace(/_/g, " ")}</TableCell>
                       </TableRow>
                     ))}
