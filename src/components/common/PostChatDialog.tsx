@@ -6,7 +6,14 @@
  import { useAuth } from "@/contexts/AuthContext";
  import { useToast } from "@/hooks/use-toast";
  import { Button } from "@/components/ui/button";
- import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+ import {
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogHeader,
+   DialogTitle,
+   DialogTrigger,
+ } from "@/components/ui/dialog";
  import { ScrollArea } from "@/components/ui/scroll-area";
  import { Textarea } from "@/components/ui/textarea";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,26 +33,42 @@
  };
  
  async function fetchMessages(entityType: string, entityId: string) {
-   const { data, error } = await supabase
+   // NOTE: post_messages.sender_profile_id is not a declared FK to profiles in the backend schema,
+   // so we cannot use PostgREST embedded joins here. We fetch messages, then hydrate sender info.
+   const { data: msgs, error } = await supabase
      .from("post_messages")
-     .select(
-       `
-       id,
-       created_at,
-       message,
-       sender_profile_id,
-       sender:profiles!post_messages_sender_profile_id_fkey (
-         full_name,
-         avatar_url
-       )
-     `,
-     )
+     .select("id, created_at, message, sender_profile_id")
      .eq("entity_type", entityType)
      .eq("entity_id", entityId)
      .order("created_at", { ascending: true });
- 
+
    if (error) throw error;
-   return (data ?? []) as unknown as MessageRow[];
+
+   const messageRows = (msgs ?? []) as Array<{
+     id: string;
+     created_at: string;
+     message: string;
+     sender_profile_id: string;
+   }>;
+
+   const senderIds = Array.from(new Set(messageRows.map((m) => m.sender_profile_id)));
+   if (senderIds.length === 0) return [];
+
+   const { data: profiles, error: profilesError } = await supabase
+     .from("profiles")
+     .select("id, full_name, avatar_url")
+     .in("id", senderIds);
+
+   if (profilesError) throw profilesError;
+
+   const byId = new Map(
+     (profiles ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]),
+   );
+
+   return messageRows.map((m) => ({
+     ...m,
+     sender: byId.get(m.sender_profile_id) ?? { full_name: null, avatar_url: null },
+   })) as MessageRow[];
  }
  
  export default function PostChatDialog({ entityType, entityId, triggerLabel = "Chat" }: PostChatDialogProps) {
@@ -67,7 +90,12 @@
        .channel(`post_chat:${entityType}:${entityId}`)
        .on(
          "postgres_changes",
-         { event: "INSERT", schema: "public", table: "post_messages", filter: `entity_id=eq.${entityId}` },
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "post_messages",
+            filter: `entity_id=eq.${entityId}`,
+          },
          () => refetch(),
        )
        .subscribe();
@@ -114,6 +142,9 @@
        <DialogContent className="max-w-lg">
          <DialogHeader>
            <DialogTitle>Chat</DialogTitle>
+            <DialogDescription>
+              Messages are visible while the post is active.
+            </DialogDescription>
          </DialogHeader>
  
          <ScrollArea className="h-[400px] pr-4">
