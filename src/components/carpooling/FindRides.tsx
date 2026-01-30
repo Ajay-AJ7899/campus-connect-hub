@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import RequestMessageDialog from "@/components/common/RequestMessageDialog";
 import { formatMoneyFromCents } from "@/lib/money";
+ import PostChatDialog from "@/components/common/PostChatDialog";
 
 interface TravelPost {
   id: string;
@@ -356,7 +357,7 @@ const FindRides = ({ onOfferRide }: FindRidesProps) => {
                         {ride.driver.trips_completed} trips completed
                       </p>
                     </div>
-
+                    <PostChatDialog entityType="carpool" entityId={ride.id} />
                     <Button
                       type="button"
                       variant="outline"
