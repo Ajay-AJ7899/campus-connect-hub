@@ -626,6 +626,36 @@ export type Database = {
           },
         ]
       }
+      post_messages: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          expires_at: string
+          id: string
+          message: string
+          sender_profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          expires_at: string
+          id?: string
+          message: string
+          sender_profile_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          expires_at?: string
+          id?: string
+          message?: string
+          sender_profile_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -883,6 +913,14 @@ export type Database = {
       can_access_ticket: {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
+      }
+      can_chat_on_post: {
+        Args: { _entity_id: string; _entity_type: string }
+        Returns: boolean
+      }
+      chat_expires_at: {
+        Args: { _entity_id: string; _entity_type: string }
+        Returns: string
       }
       create_campus: {
         Args: {
