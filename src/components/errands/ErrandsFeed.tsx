@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import type { ErrandPhotoRow, ErrandRow } from "./errands.types";
 import { formatMoneyFromCents } from "@/lib/money";
+ import PostChatDialog from "@/components/common/PostChatDialog";
 
 type ErrandsFeedProps = {
   mode: "feed" | "mine";
@@ -259,18 +260,20 @@ export default function ErrandsFeed({ mode, requesterProfileId }: ErrandsFeedPro
 
                   <Button
                     className="w-full"
-                    disabled={!profile || profile.id === e.requester_profile_id}
-                    onClick={() => setRequestErrandId(e.id)}
-                  >
-                    Request
-                  </Button>
-
-                  <Button
-                    className="w-full"
                     variant="outline"
                     onClick={() => navigate(`/users/${e.requester_profile_id}`)}
                   >
                     View profile
+                  </Button>
+
+                  <PostChatDialog entityType="errand" entityId={e.id} />
+
+                  <Button
+                    className="w-full gradient-primary text-primary-foreground"
+                    disabled={!profile || profile.id === e.requester_profile_id}
+                    onClick={() => setRequestErrandId(e.id)}
+                  >
+                    Request
                   </Button>
                 </div>
               )}
