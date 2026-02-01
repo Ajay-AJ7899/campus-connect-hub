@@ -245,9 +245,9 @@ const Auth = () => {
   };
 
   const handleDemoLogin = async () => {
-    // Public demo credentials (intentionally non-secret)
+    // Public demo credentials (intentionally non-secret, 6+ chars required by backend)
     const demoEmail = "demo@campusone.app";
-    const demoPassword = "demo";
+    const demoPassword = "demo123";
 
     setEmail(demoEmail);
     setPassword(demoPassword);
