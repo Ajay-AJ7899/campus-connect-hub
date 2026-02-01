@@ -14,8 +14,8 @@ import CampusPicker from "@/components/auth/CampusPicker";
 import logo from "@/assets/logo.png";
 
 const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
-const nameSchema = z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long");
+const passwordSchema = z.string().min(1, "Password is required");
+const nameSchema = z.string().min(1, "Name is required").max(100, "Name is too long");
 const campusSchema = z.string().min(1, "Please select your campus");
 
 const LAST_CAMPUS_KEY = "campus_one:last_campus_id";
