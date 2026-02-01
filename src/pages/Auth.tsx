@@ -150,6 +150,19 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
+          const msg = (error.message || "").toLowerCase();
+
+          // Rate limit error - start cooldown
+          if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
+            setCooldownSeconds(45);
+            toast({
+              variant: "destructive",
+              title: "Too many attempts",
+              description: "Please wait 45 seconds and try again.",
+            });
+            return;
+          }
+
           if (error.message.includes("Invalid login credentials")) {
             toast({
               variant: "destructive",
@@ -226,6 +239,79 @@ const Auth = () => {
           navigate("/home");
         }
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    // Public demo credentials (intentionally non-secret)
+    const demoEmail = "demo@campusone.app";
+    const demoPassword = "demo";
+
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+
+    setLoading(true);
+    try {
+      // Try sign-in first (works once demo user exists)
+      const { error: signInErr } = await signIn(demoEmail, demoPassword);
+      if (!signInErr) {
+        toast({ title: "Signed in as demo", description: "Welcome!" });
+        navigate("/home");
+        return;
+      }
+
+      const msg = (signInErr.message || "").toLowerCase();
+      if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
+        setCooldownSeconds(45);
+        toast({
+          variant: "destructive",
+          title: "Too many attempts",
+          description: "Please wait 45 seconds and try again.",
+        });
+        return;
+      }
+
+      // If demo user doesn't exist yet, create it once, then sign in.
+      const { error: signUpErr } = await signUp(demoEmail, demoPassword, "Demo User");
+      if (signUpErr) {
+        const signUpMsg = (signUpErr.message || "").toLowerCase();
+        if (signUpMsg.includes("already registered") || signUpMsg.includes("already exists")) {
+          // Someone created it already; retry sign-in.
+          const { error: retryErr } = await signIn(demoEmail, demoPassword);
+          if (retryErr) {
+            toast({ variant: "destructive", title: "Demo login failed", description: retryErr.message });
+            return;
+          }
+          toast({ title: "Signed in as demo", description: "Welcome!" });
+          navigate("/home");
+          return;
+        }
+
+        if (signUpMsg.includes("rate") || signUpMsg.includes("too many") || signUpMsg.includes("exceeded")) {
+          setCooldownSeconds(45);
+          toast({
+            variant: "destructive",
+            title: "Signup temporarily limited",
+            description: "Too many attempts. Please wait 45 seconds and try again.",
+          });
+          return;
+        }
+
+        toast({ variant: "destructive", title: "Demo signup failed", description: signUpErr.message });
+        return;
+      }
+
+      const { error: finalSignInErr } = await signIn(demoEmail, demoPassword);
+      if (finalSignInErr) {
+        toast({ variant: "destructive", title: "Demo login failed", description: finalSignInErr.message });
+        return;
+      }
+
+      await applyCampusToProfile(campusId);
+      toast({ title: "Signed in as demo", description: "Welcome!" });
+      navigate("/home");
     } finally {
       setLoading(false);
     }
@@ -364,6 +450,19 @@ const Auth = () => {
                 <>{isLogin ? "Sign In" : "Create Account"}</>
               )}
             </Button>
+
+            {/* Demo login (sign-in only) */}
+            {isLogin && (
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full h-14 text-base font-semibold rounded-xl"
+                onClick={handleDemoLogin}
+                disabled={loading || cooldownSeconds > 0}
+              >
+                {cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : "Demo Login"}
+              </Button>
+            )}
           </form>
 
           {/* Toggle login/signup */}
