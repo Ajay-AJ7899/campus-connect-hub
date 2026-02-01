@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Car, Users, Shield, Sparkles } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,6 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -198,26 +196,6 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-
-      if (result.redirected) return; // browser will navigate
-      if (result.error) {
-        toast({
-          variant: "destructive",
-          title: "Google sign-in failed",
-          description: result.error.message,
-        });
-      }
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   const features = [
     { icon: Car, text: "Share rides & save money" },
     { icon: Users, text: "Connect with campus community" },
@@ -350,34 +328,6 @@ const Auth = () => {
               )}
             </Button>
           </form>
-
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-background text-muted-foreground">or continue with</span>
-            </div>
-          </div>
-
-          {/* Social Login */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-14 text-base rounded-xl border-2 hover:bg-secondary/50 transition-all"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-          >
-            {googleLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                Connecting to Google...
-              </>
-            ) : (
-              "Continue with Google"
-            )}
-          </Button>
 
           {/* Toggle login/signup */}
           <p className="mt-8 text-center text-muted-foreground">
