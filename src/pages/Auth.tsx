@@ -13,7 +13,8 @@ import CampusPicker from "@/components/auth/CampusPicker";
 import logo from "@/assets/logo.png";
 
 const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(1, "Password is required");
+// Backend enforces 6+ characters (otherwise returns "weak_password").
+const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(1, "Name is required").max(100, "Name is too long");
 const campusSchema = z.string().min(1, "Please select your campus");
 
@@ -152,6 +153,15 @@ const Auth = () => {
         if (error) {
           const msg = (error.message || "").toLowerCase();
 
+          if (msg.includes("email") && msg.includes("disabled")) {
+            toast({
+              variant: "destructive",
+              title: "Email login disabled",
+              description: "Enable the Email/Password provider in Backend → Authentication.",
+            });
+            return;
+          }
+
           // Rate limit error - start cooldown
           if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
             setCooldownSeconds(45);
@@ -190,6 +200,15 @@ const Auth = () => {
         const { error } = await signUp(email, password, fullName);
         if (error) {
           const msg = (error.message || "").toLowerCase();
+
+          if (msg.includes("email") && msg.includes("disabled")) {
+            toast({
+              variant: "destructive",
+              title: "Email signup disabled",
+              description: "Enable the Email/Password provider in Backend → Authentication.",
+            });
+            return;
+          }
 
           // Rate limit error - start cooldown
           if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
@@ -263,6 +282,16 @@ const Auth = () => {
       }
 
       const msg = (signInErr.message || "").toLowerCase();
+
+      if (msg.includes("email") && msg.includes("disabled")) {
+        toast({
+          variant: "destructive",
+          title: "Email login disabled",
+          description: "Enable the Email/Password provider in Backend → Authentication.",
+        });
+        return;
+      }
+
       if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
         setCooldownSeconds(45);
         toast({
@@ -277,6 +306,15 @@ const Auth = () => {
       const { error: signUpErr } = await signUp(demoEmail, demoPassword, "Demo User");
       if (signUpErr) {
         const signUpMsg = (signUpErr.message || "").toLowerCase();
+
+        if (signUpMsg.includes("email") && signUpMsg.includes("disabled")) {
+          toast({
+            variant: "destructive",
+            title: "Email signup disabled",
+            description: "Enable the Email/Password provider in Backend → Authentication.",
+          });
+          return;
+        }
         if (signUpMsg.includes("already registered") || signUpMsg.includes("already exists")) {
           // Someone created it already; retry sign-in.
           const { error: retryErr } = await signIn(demoEmail, demoPassword);
