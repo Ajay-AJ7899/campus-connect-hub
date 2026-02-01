@@ -27,6 +27,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,6 +45,13 @@ const Auth = () => {
     const saved = localStorage.getItem(LAST_CAMPUS_KEY);
     if (saved) setCampusId(saved);
   }, []);
+
+  // Cooldown timer effect
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const timer = setTimeout(() => setCooldownSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldownSeconds]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -170,29 +178,44 @@ const Auth = () => {
         if (error) {
           const msg = (error.message || "").toLowerCase();
 
+          // Rate limit error - start cooldown
           if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
+            setCooldownSeconds(45);
             toast({
               variant: "destructive",
               title: "Signup temporarily limited",
-              description:
-                "Too many signup attempts were made recently from this device/network. Please wait a few minutes and try again.",
+              description: "Too many attempts. Please wait 45 seconds and try again.",
             });
             return;
           }
 
-          if (error.message.includes("already registered")) {
+          // Signups disabled error
+          if (msg.includes("signups") && msg.includes("disabled")) {
+            toast({
+              variant: "destructive",
+              title: "Signups disabled",
+              description: "Email signups are currently disabled. Please contact the app owner.",
+            });
+            return;
+          }
+
+          // Already registered
+          if (msg.includes("already registered") || msg.includes("already exists")) {
             toast({
               variant: "destructive",
               title: "Account exists",
               description: "This email is already registered. Try logging in instead.",
             });
-          } else {
-            toast({
-              variant: "destructive",
-              title: "Sign up failed",
-              description: error.message,
-            });
+            setIsLogin(true);
+            return;
           }
+
+          // Generic error
+          toast({
+            variant: "destructive",
+            title: "Sign up failed",
+            description: error.message,
+          });
         } else {
           // Save the campus immediately; once the session exists, also persist it to the profile.
           await applyCampusToProfile(campusId);
@@ -328,13 +351,15 @@ const Auth = () => {
             <Button
               type="submit"
               className="w-full h-14 text-lg font-semibold gradient-primary text-primary-foreground rounded-xl shadow-glow hover:shadow-glow-lg transition-all duration-300"
-              disabled={loading}
+              disabled={loading || cooldownSeconds > 0}
             >
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                   {isLogin ? "Signing in..." : "Creating account..."}
                 </>
+              ) : cooldownSeconds > 0 ? (
+                <>Wait {cooldownSeconds}s</>
               ) : (
                 <>{isLogin ? "Sign In" : "Create Account"}</>
               )}
