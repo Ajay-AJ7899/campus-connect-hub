@@ -168,6 +168,18 @@ const Auth = () => {
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
+          const msg = (error.message || "").toLowerCase();
+
+          if (msg.includes("rate") || msg.includes("too many") || msg.includes("exceeded")) {
+            toast({
+              variant: "destructive",
+              title: "Signup temporarily limited",
+              description:
+                "Too many signup attempts were made recently from this device/network. Please wait a few minutes and try again.",
+            });
+            return;
+          }
+
           if (error.message.includes("already registered")) {
             toast({
               variant: "destructive",
